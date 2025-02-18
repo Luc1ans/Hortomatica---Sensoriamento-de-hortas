@@ -1,0 +1,74 @@
+<?php
+require_once 'Database.php';
+require_once('../Controller/HortaController.php');
+
+class DispositivoController
+{
+    private $db;
+
+    public function __construct($pdo)
+    {
+        $this->db = $pdo;
+    }
+
+    public function updateDispositivo($idDispositivo, $nome, $status, $data_instalacao, $userId)
+    {
+        $sql = "UPDATE dispositivo 
+            SET nome_dispositivo = :nome_dispositivo, 
+                status = :status, 
+                data_instalacao = :data_instalacao,
+                user_id = :user_id
+            WHERE idDispositivo = :idDispositivo";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':idDispositivo', $idDispositivo, PDO::PARAM_INT);
+        $stmt->bindParam(':nome_dispositivo', $nome, PDO::PARAM_STR);
+        $stmt->bindParam(':status', $status, PDO::PARAM_STR);
+        $stmt->bindParam(':data_instalacao', $data_instalacao, PDO::PARAM_STR);
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+
+
+    // Função para buscar todos os dispositivos
+    public function getAllDispositivos()
+    {
+        $sql = "SELECT idDispositivo, localizacao FROM Dispositivo WHERE user_id IS NULL";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function deleteDispositivo($idDispositivo)
+    {
+        $sql = "UPDATE dispositivo 
+                SET user_id = NULL, Horta_idHorta = NULL
+                WHERE idDispositivo = :idDispositivo";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':idDispositivo', $idDispositivo);
+        return $stmt->execute();
+    }
+
+    public function getAllDispositivosid($userId)
+    {
+        $sql = "SELECT idDispositivo, nome_dispositivo, localizacao, status, data_instalacao FROM dispositivo WHERE user_id = :user_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':user_id', $userId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getDispositivoByHorta($idHorta)
+    {
+        $sql = "SELECT * FROM dispositivo WHERE Horta_idHorta = :idHorta";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':idHorta', $idHorta, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+}
+?>
