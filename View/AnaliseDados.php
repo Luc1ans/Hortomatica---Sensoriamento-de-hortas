@@ -20,22 +20,52 @@ if (empty($dispositivosIDs)) {
     die("Nenhum dispositivo vinculado a esta horta.");
 }
 
-$idDispositivo = $dispositivosIDs[0]['idDispositivo'];
+// Recupera os dispositivos selecionados via GET; se nenhum for marcado, usa todos
+$dispositivosSelecionados = isset($_GET['dispositivos']) ? $_GET['dispositivos'] : array_map(function ($d) {
+    return $d['idDispositivo']; }, $dispositivosIDs);
 
 $filtroSensor = $_GET['sensor'] ?? '';
 $filtroDataInicial = $_GET['data_inicial'] ?? '';
 $filtroDataFinal = $_GET['data_final'] ?? '';
 
-$leituras = $leituraController->getLeiturasByDispositivo($idDispositivo, $filtroSensor, $filtroDataInicial, $filtroDataFinal);
-$ultimasLeituras = $leituraController->getUltimasLeituras($idDispositivo);
+// Recupera leituras de cada dispositivo selecionado e mescla os resultados
+$leituras = [];
+$ultimasLeituras = [];
+foreach ($dispositivosSelecionados as $idDisp) {
+    $leiturasDevice = $leituraController->getLeiturasByDispositivo($idDisp, $filtroSensor, $filtroDataInicial, $filtroDataFinal);
+    $ultimasDevice = $leituraController->getUltimasLeituras($idDisp);
+    $leituras = array_merge($leituras, $leiturasDevice);
+    $ultimasLeituras = array_merge($ultimasLeituras, $ultimasDevice);
+}
 
+// Organiza as leituras por sensor e timestamp, separando os valores de cada dispositivo
 $leiturasPorSensor = [];
 foreach ($leituras as $leitura) {
     $sensor = $leitura['nome_sensor'];
+    $idDisp = $leitura['Dispositivo_idDispositivo'];
+    $timestamp = $leitura['data_leitura'] . ' ' . $leitura['hora_leitura'];
     if (!isset($leiturasPorSensor[$sensor])) {
         $leiturasPorSensor[$sensor] = [];
     }
-    $leiturasPorSensor[$sensor][] = $leitura;
+    if (!isset($leiturasPorSensor[$sensor][$timestamp])) {
+        $leiturasPorSensor[$sensor][$timestamp] = [];
+    }
+    $leiturasPorSensor[$sensor][$timestamp][$idDisp] = (float) $leitura['valor_leitura'];
+}
+
+// Prepara os dados para os gráficos: para cada sensor, cria linhas com a data/hora e uma coluna para cada dispositivo selecionado
+$chartData = [];
+foreach ($leiturasPorSensor as $sensor => $dataByTime) {
+    ksort($dataByTime);
+    $rows = [];
+    foreach ($dataByTime as $timestamp => $deviceValues) {
+        $row = [$timestamp];
+        foreach ($dispositivosSelecionados as $idDisp) {
+            $row[] = isset($deviceValues[$idDisp]) ? $deviceValues[$idDisp] : null;
+        }
+        $rows[] = $row;
+    }
+    $chartData[$sensor] = $rows;
 }
 ?>
 
@@ -50,32 +80,36 @@ foreach ($leituras as $leitura) {
     <link rel="stylesheet" href="..\Assets\style.css">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
+        // Carrega a biblioteca do Google Charts e desenha os gráficos após o carregamento
         google.charts.load('current', { 'packages': ['corechart'] });
         google.charts.setOnLoadCallback(drawCharts);
 
         function drawCharts() {
-            <?php foreach ($leiturasPorSensor as $sensor => $leituras): ?>
-                drawChart('<?= $sensor ?>', <?= json_encode($leituras) ?>);
-            <?php endforeach; ?>
+            var chartData = <?php echo json_encode($chartData); ?>;
+            var dispositivosSelecionados = <?php echo json_encode($dispositivosSelecionados); ?>;
+            // Para cada sensor, chama a função para desenhar o gráfico
+            for (var sensor in chartData) {
+                drawChart(sensor, chartData[sensor], dispositivosSelecionados);
+            }
         }
 
-        function drawChart(sensor, leituras) {
+        function drawChart(sensor, rows, dispositivos) {
             var data = new google.visualization.DataTable();
             data.addColumn('string', 'Data e Hora');
-            data.addColumn('number', 'Valor');
-
-            leituras.forEach(function (leitura) {
-                data.addRow([leitura.data_leitura + ' ' + leitura.hora_leitura, parseFloat(leitura.valor_leitura)]);
-            });
+            // Adiciona uma coluna para cada dispositivo selecionado
+            for (var i = 0; i < dispositivos.length; i++) {
+                data.addColumn('number', 'Dispositivo ' + dispositivos[i]);
+            }
+            data.addRows(rows);
 
             var options = {
                 title: 'Leituras do Sensor: ' + sensor,
-                titleTextStyle: { color: '#2c5a1d', fontSize: 18 },
                 curveType: 'function',
-                legend: { position: 'bottom', textStyle: { color: '#555' } },
-                hAxis: { title: 'Data e Hora', textStyle: { color: '#666' }, titleTextStyle: { color: '#666' } },
-                vAxis: { title: 'Valor', textStyle: { color: '#666' }, titleTextStyle: { color: '#666' } },
-                colors: ['#3e8914'],
+                legend: { position: 'bottom' },
+                hAxis: { title: 'Data e Hora' },
+                vAxis: { title: 'Valor' },
+                // Define um conjunto de cores; ajuste conforme o número de dispositivos
+                colors: ['#3e8914', '#FF0000', '#0000FF', '#FF9900'],
                 backgroundColor: '#f8f9fa',
                 chartArea: { backgroundColor: '#f8f9fa' }
             };
@@ -115,22 +149,56 @@ foreach ($leituras as $leitura) {
     <div class="container mt-4">
         <h3 class="mb-4 text-success"><i class="bi bi-graph-up me-2"></i>Análise de Dados</h3>
 
-        <!-- Filtros -->
+        <!-- Seleção de Dispositivos (para as tabelas e gráficos) -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-4 text-success"><i class="bi bi-check2-square me-2"></i>Selecione os
+                    Dispositivos</h5>
+                <form method="GET" action="">
+                    <input type="hidden" name="idHorta" value="<?= htmlspecialchars($idHorta, ENT_QUOTES, 'UTF-8'); ?>">
+                    <?php foreach ($dispositivosIDs as $dispositivo): ?>
+                        <?php $checked = in_array($dispositivo['idDispositivo'], $dispositivosSelecionados) ? 'checked' : ''; ?>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="dispositivos[]"
+                                value="<?= htmlspecialchars($dispositivo['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>"
+                                <?= $checked; ?>>
+                            <label class="form-check-label">Dispositivo
+                                <?= htmlspecialchars($dispositivo['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?></label>
+                        </div>
+                    <?php endforeach; ?>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary btn-action">
+                            <i class="bi bi-check2-circle me-2"></i>Aplicar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Filtros adicionais -->
         <div class="card mb-4 shadow-sm">
             <div class="card-body">
                 <h5 class="card-title mb-4 text-success"><i class="bi bi-funnel me-2"></i>Filtros</h5>
                 <form method="GET" action="">
                     <input type="hidden" name="idHorta" value="<?= htmlspecialchars($idHorta, ENT_QUOTES, 'UTF-8'); ?>">
+                    <!-- Preserva os dispositivos selecionados -->
+                    <?php foreach ($dispositivosSelecionados as $disp): ?>
+                        <input type="hidden" name="dispositivos[]"
+                            value="<?= htmlspecialchars($disp, ENT_QUOTES, 'UTF-8'); ?>">
+                    <?php endforeach; ?>
                     <div class="row g-3">
                         <div class="col-12 col-md-6 col-lg-3">
                             <label for="sensor" class="form-label">Sensor</label>
                             <select name="sensor" id="sensor" class="form-select">
                                 <option value="">Todos</option>
                                 <option value="Umidade do Solo" <?= $filtroSensor === 'Umidade do Solo' ? 'selected' : ''; ?>>Umidade do Solo</option>
-                                <option value="Umidade do Ar" <?= $filtroSensor === 'Umidade do Ar' ? 'selected' : ''; ?>>Umidade do Ar</option>
-                                <option value="Chuva Digital" <?= $filtroSensor === 'Chuva Digital' ? 'selected' : ''; ?>>Chuva Digital</option>
+                                <option value="Umidade do Ar" <?= $filtroSensor === 'Umidade do Ar' ? 'selected' : ''; ?>>
+                                    Umidade do Ar</option>
+                                <option value="Chuva Digital" <?= $filtroSensor === 'Chuva Digital' ? 'selected' : ''; ?>>
+                                    Chuva Digital</option>
                                 <option value="Chuva Analógico" <?= $filtroSensor === 'Chuva Analógico' ? 'selected' : ''; ?>>Chuva Analógico</option>
-                                <option value="Temperatura" <?= $filtroSensor === 'Temperatura' ? 'selected' : ''; ?>>Temperatura</option>
+                                <option value="Temperatura" <?= $filtroSensor === 'Temperatura' ? 'selected' : ''; ?>>
+                                    Temperatura</option>
                             </select>
                         </div>
                         <div class="col-12 col-md-6 col-lg-3">
@@ -147,8 +215,8 @@ foreach ($leituras as $leitura) {
                             <button type="submit" class="btn btn-primary btn-action flex-grow-1">
                                 <i class="bi bi-filter me-2"></i>Filtrar
                             </button>
-                            <a href="AnaliseDados.php?idHorta=<?= htmlspecialchars($idHorta, ENT_QUOTES, 'UTF-8'); ?>" 
-                               class="btn btn-secondary btn-action">
+                            <a href="AnaliseDados.php?idHorta=<?= htmlspecialchars($idHorta, ENT_QUOTES, 'UTF-8'); ?>"
+                                class="btn btn-secondary btn-action">
                                 <i class="bi bi-arrow-clockwise"></i>
                             </a>
                         </div>
@@ -160,13 +228,13 @@ foreach ($leituras as $leitura) {
         <!-- Gráficos -->
         <div class="card mb-4 shadow-sm">
             <div class="card-body">
-                <h5 class="card-title mb-4 text-success"><i class="bi bi-bar-chart-line me-2"></i>Gráficos das Leituras</h5>
+                <h5 class="card-title mb-4 text-success"><i class="bi bi-bar-chart-line me-2"></i>Gráficos das Leituras
+                </h5>
                 <div class="row g-4">
-                    <?php foreach ($leiturasPorSensor as $sensor => $leituras): ?>
+                    <?php foreach ($chartData as $sensor => $rows): ?>
                         <div class="col-12">
-                            <div class="chart-container p-3 rounded-3" 
-                                 id="chart_<?= htmlspecialchars($sensor, ENT_QUOTES, 'UTF-8'); ?>" 
-                                 style="height: 300px;">
+                            <div class="chart-container p-3 rounded-3"
+                                id="chart_<?= htmlspecialchars($sensor, ENT_QUOTES, 'UTF-8'); ?>" style="height: 300px;">
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -174,12 +242,14 @@ foreach ($leituras as $leitura) {
             </div>
         </div>
 
-        <!-- Dados -->
+        <!-- Tabelas de Dados -->
         <div class="row g-4">
+            <!-- Últimas Leituras -->
             <div class="col-12 col-lg-6">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title mb-4 text-success"><i class="bi bi-clock-history me-2"></i>Últimas Leituras</h5>
+                        <h5 class="card-title mb-4 text-success"><i class="bi bi-clock-history me-2"></i>Últimas
+                            Leituras</h5>
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
@@ -188,6 +258,7 @@ foreach ($leituras as $leitura) {
                                         <th>Valor</th>
                                         <th>Data</th>
                                         <th>Hora</th>
+                                        <th>Dispositivo</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -195,14 +266,17 @@ foreach ($leituras as $leitura) {
                                         <?php foreach ($ultimasLeituras as $leitura): ?>
                                             <tr>
                                                 <td><?= htmlspecialchars($leitura['nome_sensor'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                <td><?= htmlspecialchars($leitura['valor_leitura'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                <td><?= htmlspecialchars($leitura['valor_leitura'], ENT_QUOTES, 'UTF-8'); ?>
+                                                </td>
                                                 <td><?= htmlspecialchars($leitura['data_leitura'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                 <td><?= htmlspecialchars($leitura['hora_leitura'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                <td><?= htmlspecialchars($leitura['Dispositivo_idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>
+                                                </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="4" class="text-center">Nenhuma leitura encontrada.</td>
+                                            <td colspan="5" class="text-center">Nenhuma leitura encontrada.</td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
@@ -211,7 +285,7 @@ foreach ($leituras as $leitura) {
                     </div>
                 </div>
             </div>
-            
+            <!-- Leituras Filtradas -->
             <div class="col-12 col-lg-6">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body">
@@ -224,6 +298,7 @@ foreach ($leituras as $leitura) {
                                         <th>Valor</th>
                                         <th>Data</th>
                                         <th>Hora</th>
+                                        <th>Dispositivo</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -231,14 +306,17 @@ foreach ($leituras as $leitura) {
                                         <?php foreach ($leituras as $leitura): ?>
                                             <tr>
                                                 <td><?= htmlspecialchars($leitura['nome_sensor'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                <td><?= htmlspecialchars($leitura['valor_leitura'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                <td><?= htmlspecialchars($leitura['valor_leitura'], ENT_QUOTES, 'UTF-8'); ?>
+                                                </td>
                                                 <td><?= htmlspecialchars($leitura['data_leitura'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                 <td><?= htmlspecialchars($leitura['hora_leitura'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                <td><?= htmlspecialchars($leitura['Dispositivo_idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>
+                                                </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="4" class="text-center">Nenhuma leitura encontrada.</td>
+                                            <td colspan="5" class="text-center">Nenhuma leitura encontrada.</td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
@@ -249,6 +327,7 @@ foreach ($leituras as $leitura) {
             </div>
         </div>
 
+        <!-- Botão para voltar -->
         <div class="mt-4">
             <a href="index.php" class="btn btn-secondary btn-action">
                 <i class="bi bi-arrow-left me-2"></i>Voltar
@@ -256,4 +335,5 @@ foreach ($leituras as $leitura) {
         </div>
     </div>
 </body>
+
 </html>
