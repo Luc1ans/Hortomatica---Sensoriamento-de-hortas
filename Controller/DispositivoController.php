@@ -10,7 +10,20 @@ class DispositivoController
     {
         $this->db = $pdo;
     }
-
+    public function getDispositivoById($idDispositivo)
+    {
+        $sql = "SELECT * FROM dispositivo WHERE idDispositivo = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':id', $idDispositivo, PDO::PARAM_INT);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$result) {
+            return ['nome_dispositivo' => 'Desconhecido'];
+        }
+        return $result;
+    }
+    
     public function updateDispositivo($idDispositivo, $nome, $status, $data_instalacao, $userId)
     {
         $sql = "UPDATE dispositivo 

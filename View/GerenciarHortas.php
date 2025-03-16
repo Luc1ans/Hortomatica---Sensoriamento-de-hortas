@@ -7,7 +7,7 @@ require_once('../Assets/Logout.php');
 
 if (!isset($_SESSION['user_id'])) {
     echo "<script>alert('Usuário não autenticado. Faça login para continuar.');</script>";
-    header('Location: login.php'); // Redireciona para a página de login
+    header('Location: login.php');
     exit();
 }
 
@@ -16,7 +16,6 @@ $pdo = Database::connect();
 $controller = new HortaController($pdo);
 $controllerD = new DispositivoController($pdo);
 
-// Processar ações do formulário
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $acao = $_POST['acao'] ?? '';
 
@@ -34,18 +33,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 htmlspecialchars($observacoes, ENT_QUOTES, 'UTF-8'),
                 $usuarioId
             );
-
-            if ($resultado) {
-
-            } else {
+            if (!$resultado) {
                 echo "<p style='color: red;'>Erro ao adicionar a horta.</p>";
             }
         }
     } elseif ($acao === 'excluir') {
         $idHorta = $_POST['idHorta'] ?? '';
-        if ($controller->deleteHorta($idHorta)) {
-
-        } else {
+        if (!$controller->deleteHorta($idHorta)) {
             echo "<p style='color: red;'>Erro ao excluir a horta.</p>";
         }
     } elseif ($acao === 'editar') {
@@ -54,25 +48,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $plantacoes = $_POST['plantacoes'] ?? '';
         $observacoes = $_POST['observacoes'] ?? '';
 
-        if ($controller->updateHorta($idHorta, $nomeHorta, $plantacoes, $observacoes)) {
-
-        } else {
+        if (!$controller->updateHorta($idHorta, $nomeHorta, $plantacoes, $observacoes)) {
             echo "<p style='color: red;'>Erro ao atualizar a horta.</p>";
         }
     } elseif ($acao === 'adicionar_dispositivo') {
         $idHorta = $_POST['idHorta'] ?? '';
         $idDispositivo = $_POST['idDispositivo'] ?? '';
-
-        if ($controller->linkHortaEDispositivo($idHorta, $idDispositivo)) {
-
-
-        } else {
+        if (!$controller->linkHortaEDispositivo($idHorta, $idDispositivo)) {
             echo "<p style='color: red;'>Erro ao linkar a horta.</p>";
         }
-
     }
-
 }
+
 $hortas = $controller->getHortasByUsuario($usuarioId);
 $dispositivoadd = $controllerD->getAllDispositivosid($usuarioId);
 
@@ -80,7 +67,6 @@ $dispositivosVinculados = [];
 foreach ($hortas as $horta) {
     $dispositivosVinculados[$horta['idHorta']] = $controllerD->getDispositivoByHorta($horta['idHorta']);
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -139,22 +125,23 @@ foreach ($hortas as $horta) {
                                         <i class="bi bi-trash"></i> Excluir
                                     </button>
                                 </form>
-                                <button class="btn btn-warning btn-action" 
+                                <button class="btn btn-warning btn-action"
                                     onclick="document.getElementById('modal<?= $horta['idHorta']; ?>').style.display='block'">
                                     <i class="bi bi-pencil"></i> Editar
                                 </button>
                             </div>
                             <div class="mt-3">
+                                <!-- Botão para adicionar dispositivo -->
+                                <button class="btn btn-warning btn-action w-100 mb-2"
+                                    onclick="document.getElementById('modalAdicionarDispositivo<?= $horta['idHorta']; ?>').style.display='block'">
+                                    <i class="bi bi-plus-circle"></i> Adicionar dispositivo
+                                </button>
+                                <!-- Se houver dispositivos vinculados, exibe também o botão para visualizar -->
                                 <?php if (isset($dispositivosVinculados[$horta['idHorta']]) && !empty($dispositivosVinculados[$horta['idHorta']])): ?>
                                     <a href="AnaliseDados.php?idHorta=<?= htmlspecialchars($horta['idHorta'], ENT_QUOTES, 'UTF-8'); ?>"
                                         class="btn btn-success btn-action w-100">
-                                        <i class="bi bi-eye"></i> Ver Dispositivo
+                                        <i class="bi bi-eye"></i> Ver dispositivos
                                     </a>
-                                <?php else: ?>
-                                    <button class="btn btn-warning btn-action w-100"
-                                        onclick="document.getElementById('modalAdicionarDispositivo<?= $horta['idHorta']; ?>').style.display='block'">
-                                        <i class="bi bi-plus-circle"></i> Adicionar dispositivo
-                                    </button>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -175,8 +162,7 @@ foreach ($hortas as $horta) {
                                     <label for="idDispositivo" class="form-label">Selecionar ID do dispositivo</label>
                                     <select name="idDispositivo" class="form-control" required>
                                         <?php foreach ($dispositivoadd as $dispositivo): ?>
-                                            <option
-                                                value="<?= htmlspecialchars($dispositivo['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>">
+                                            <option value="<?= htmlspecialchars($dispositivo['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>">
                                                 <?= htmlspecialchars($dispositivo['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -217,7 +203,8 @@ foreach ($hortas as $horta) {
                             </div>
                             <button type="submit" class="btn btn-success">Salvar</button>
                             <button type="button" class="btn btn-secondary"
-                                onclick="document.getElementById('modal<?= $horta['idHorta']; ?>').style.display='none'">Cancelar</button>
+                                onclick="document.getElementById('modal<?= $horta['idHorta']; ?>').style.display='none'">
+                                Cancelar</button>
                         </form>
                     </div>
                 </div>
@@ -270,5 +257,6 @@ foreach ($hortas as $horta) {
                 }
             }
         </script>
+    </div>
 </body>
 </html>

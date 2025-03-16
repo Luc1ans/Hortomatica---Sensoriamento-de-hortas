@@ -32,7 +32,10 @@ class LeituraSensores
 
     public function getLeiturasByDispositivo($idDispositivo, $sensor = '', $dataInicial = '', $dataFinal = '')
     {
-        $query = "SELECT * FROM LeituraSensores WHERE Dispositivo_idDispositivo = :idDispositivo";
+        $query = "SELECT hora_leitura, data_leitura, nome_sensor, valor_leitura, Dispositivo_idDispositivo 
+          FROM LeituraSensores 
+          WHERE Dispositivo_idDispositivo = :idDispositivo 
+            AND nome_sensor NOT IN ('GPS Latitude', 'GPS Longitude')";
 
         // Adiciona o filtro de sensor apenas se ele não estiver vazio
         if (!empty($sensor)) {
