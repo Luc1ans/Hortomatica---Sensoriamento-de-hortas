@@ -22,7 +22,8 @@ if (empty($dispositivosIDs)) {
 
 // Recupera os dispositivos selecionados via GET; se nenhum for marcado, usa todos
 $dispositivosSelecionados = isset($_GET['dispositivos']) ? $_GET['dispositivos'] : array_map(function ($d) {
-    return $d['idDispositivo']; }, $dispositivosIDs);
+    return $d['idDispositivo'];
+}, $dispositivosIDs);
 
 $filtroSensor = $_GET['sensor'] ?? '';
 $filtroDataInicial = $_GET['data_inicial'] ?? '';
@@ -121,7 +122,7 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
     <nav class="navbar navbar-expand-lg bg-body-tertiary custom-navbar">
         <div class="container-fluid">
             <a class="navbar-brand navbar-text" href="index.php">
-                <i class="bi bi-flower1 me-2"></i>Hortomática
+                <img src="..\Assets\image\logo branca.png" alt="Logo Hortomática" class="navbar-logo">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
                 aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">

@@ -16,8 +16,8 @@ require_once('../Assets/Logout.php');
 
     <nav class="navbar navbar-expand-lg bg-body-tertiary custom-navbar">
         <div class="container-fluid">
-            <a class="navbar-brand navbar-text" href="#">
-                <i class="bi bi-flower1 me-2"></i>Hortomática
+            <a class="navbar-brand navbar-text" href="index.php">
+                <img src="..\Assets\image\logo branca.png" alt="Logo Hortomática" class="navbar-logo">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
                 aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">

@@ -81,7 +81,9 @@ foreach ($hortas as $horta) {
     <title>Hortomática - Gerenciar Hortas</title>
     <nav class="navbar navbar-expand-lg bg-body-tertiary custom-navbar">
         <div class="container-fluid">
-            <a class="navbar-brand navbar-text" href="index.php">Hortomática</a>
+            <a class="navbar-brand navbar-text" href="index.php">
+                <img src="..\Assets\image\logo branca.png" alt="Logo Hortomática" class="navbar-logo">
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
                 aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -89,7 +91,8 @@ foreach ($hortas as $horta) {
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                 <div class="navbar-nav">
                     <a class="nav-link navbar-text" aria-current="page" href="GerenciarHortas.php">Gerenciar Hortas</a>
-                    <a class="nav-link navbar-text" aria-current="page" href="GerenciarDispositivos.php">Gerenciar Dispositivos</a>
+                    <a class="nav-link navbar-text" aria-current="page" href="GerenciarDispositivos.php">Gerenciar
+                        Dispositivos</a>
                     <a class="nav-link navbar-text" aria-current="page" href="Relatorio.php">Relatórios</a>
                 </div>
                 <div class="ms-auto">
@@ -110,7 +113,8 @@ foreach ($hortas as $horta) {
                 <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card h-100 card-hover">
                         <div class="card-body">
-                            <h5 class="card-title text-success"><?= htmlspecialchars($horta['nome_horta'], ENT_QUOTES, 'UTF-8'); ?></h5>
+                            <h5 class="card-title text-success">
+                                <?= htmlspecialchars($horta['nome_horta'], ENT_QUOTES, 'UTF-8'); ?></h5>
                             <p class="card-text">
                                 <strong>Plantações:</strong>
                                 <?= htmlspecialchars($horta['plantacoes'], ENT_QUOTES, 'UTF-8'); ?><br>
@@ -162,7 +166,8 @@ foreach ($hortas as $horta) {
                                     <label for="idDispositivo" class="form-label">Selecionar ID do dispositivo</label>
                                     <select name="idDispositivo" class="form-control" required>
                                         <?php foreach ($dispositivoadd as $dispositivo): ?>
-                                            <option value="<?= htmlspecialchars($dispositivo['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>">
+                                            <option
+                                                value="<?= htmlspecialchars($dispositivo['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>">
                                                 <?= htmlspecialchars($dispositivo['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -179,7 +184,7 @@ foreach ($hortas as $horta) {
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Modal de Edição -->
                 <div id="modal<?= $horta['idHorta']; ?>" class="modal">
                     <div class="modal-content">
@@ -211,8 +216,7 @@ foreach ($hortas as $horta) {
             <?php endforeach; ?>
         </div>
 
-        <button class="btn btn-primary btn-lg btn-add" 
-            onclick="document.getElementById('modal').style.display='block'">
+        <button class="btn btn-primary btn-lg btn-add" onclick="document.getElementById('modal').style.display='block'">
             <i class="bi bi-plus-lg"></i> Adicionar Horta
         </button>
 
@@ -259,4 +263,5 @@ foreach ($hortas as $horta) {
         </script>
     </div>
 </body>
+
 </html>

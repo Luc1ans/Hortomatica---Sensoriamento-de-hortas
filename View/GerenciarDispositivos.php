@@ -59,7 +59,9 @@ $dispositivosIDs = $controller->getAllDispositivosid($usuarioId);
     <title>Gerenciar Dispositivos</title>
     <nav class="navbar navbar-expand-lg bg-body-tertiary custom-navbar">
         <div class="container-fluid">
-            <a class="navbar-brand navbar-text" href="index.php">Hortomática</a>
+            <a class="navbar-brand navbar-text" href="index.php">
+                <img src="..\Assets\image\logo branca.png" alt="Logo Hortomática" class="navbar-logo">
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
                 aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -67,7 +69,8 @@ $dispositivosIDs = $controller->getAllDispositivosid($usuarioId);
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                 <div class="navbar-nav">
                     <a class="nav-link navbar-text" aria-current="page" href="GerenciarHortas.php">Gerenciar Hortas</a>
-                    <a class="nav-link navbar-text" aria-current="page" href="GerenciarDispositivos.php">Gerenciar Dispositivos</a>
+                    <a class="nav-link navbar-text" aria-current="page" href="GerenciarDispositivos.php">Gerenciar
+                        Dispositivos</a>
                     <a class="nav-link navbar-text" aria-current="page" href="Relatorio.php">Relatórios</a>
                 </div>
                 <div class="ms-auto">
@@ -97,7 +100,8 @@ $dispositivosIDs = $controller->getAllDispositivosid($usuarioId);
                                 <strong>Localização:</strong>
                                 <?= htmlspecialchars($dispositivosID['localizacao'], ENT_QUOTES, 'UTF-8'); ?><br>
                                 <strong>Status:</strong>
-                                <span class="badge bg-<?= $dispositivosID['status'] === 'Ativo' ? 'success' : 'secondary'; ?>">
+                                <span
+                                    class="badge bg-<?= $dispositivosID['status'] === 'Ativo' ? 'success' : 'secondary'; ?>">
                                     <?= htmlspecialchars($dispositivosID['status'], ENT_QUOTES, 'UTF-8'); ?>
                                 </span><br>
                                 <strong>Data de Instalação:</strong>
@@ -116,7 +120,7 @@ $dispositivosIDs = $controller->getAllDispositivosid($usuarioId);
             <?php endforeach; ?>
         </div>
 
-        <button class="btn btn-primary btn-lg btn-add" 
+        <button class="btn btn-primary btn-lg btn-add"
             onclick="document.getElementById('modalAdicionar').style.display='block'">
             <i class="bi bi-plus-lg"></i> Adicionar Dispositivo
         </button>
@@ -135,7 +139,8 @@ $dispositivosIDs = $controller->getAllDispositivosid($usuarioId);
                             <select id="idDispositivo" name="idDispositivo" class="form-control" required>
                                 <option value="">Selecione um ID</option>
                                 <?php foreach ($dispositivos as $dispositivo): ?>
-                                    <option value="<?= htmlspecialchars($dispositivo['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>">
+                                    <option
+                                        value="<?= htmlspecialchars($dispositivo['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>">
                                         <?= htmlspecialchars($dispositivo['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -168,7 +173,7 @@ $dispositivosIDs = $controller->getAllDispositivosid($usuarioId);
     </div>
 
     <script>
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             var modals = document.getElementsByClassName('modal');
             for (var i = 0; i < modals.length; i++) {
                 if (event.target == modals[i]) {
@@ -178,4 +183,5 @@ $dispositivosIDs = $controller->getAllDispositivosid($usuarioId);
         }
     </script>
 </body>
+
 </html>

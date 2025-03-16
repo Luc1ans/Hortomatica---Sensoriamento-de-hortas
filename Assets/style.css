@@ -1,16 +1,43 @@
 /* NAVBAR CSS */
 .navbar {
-    background-color: #3e8914 !important; 
+    background: linear-gradient(135deg, #2c5a1d, #3e8914);; 
+    height: 60px; /* Ou qualquer altura desejada para a navbar */
+    padding: 0; /* Remove o preenchimento padrão */
+    line-height: 60px; /* Alinha o texto no meio da navbar */
+    display: flex;
+    align-items: center; /* Garante que a logo e o texto fiquem alinhados verticalmente */
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center; /* Alinha verticalmente o texto e a logo */
+    justify-content: flex-start; /* Alinha à esquerda */
 }
 
 .navbar-text {
     color: white;
+    margin-left: -10px; /* Pequeno espaço entre logo e texto */
+    font-weight: bold;
+    margin-top: 3px;
 }
+
+.navbar-logo {
+    margin-bottom: 7px;
+    width: 200px; /* Ajuste a largura para tornar o texto legível */
+    max-height: 1000px; /* Mantém a altura dentro da navbar */
+}
+
+/* Aumentar o espaço entre os atalhos das páginas */
+.navbar-nav .nav-link {
+    margin-left: -10px;  /* Aumenta o espaço à esquerda entre os itens */
+    margin-right: 10px; /* Aumenta o espaço à direita entre os itens */
+}
+
 
 /* BODY CSS */
 body {
     font-family: Arial, sans-serif;
-    background-color: #c5f0c7;
+    background-color: #f6fcf5;
     margin: 0;
     padding: 0;
 }
