@@ -96,28 +96,34 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
 
         function drawChart(sensor, rows, dispositivos) {
             var data = new google.visualization.DataTable();
-            data.addColumn('string', 'Data e Hora');
-            // Adiciona uma coluna para cada dispositivo selecionado
+            data.addColumn('datetime', 'Data e Hora'); // Mantém o uso de datetime
+
             for (var i = 0; i < dispositivos.length; i++) {
                 data.addColumn('number', 'Dispositivo ' + dispositivos[i]);
             }
-            data.addRows(rows);
+
+            var formattedRows = rows.map(row => {
+                var dateTime = new Date(row[0]); // Converte string para objeto Date
+                return [dateTime, ...row.slice(1)];
+            });
+
+            data.addRows(formattedRows);
 
             var options = {
                 title: 'Leituras do Sensor: ' + sensor,
-                curveType: 'function',
                 legend: { position: 'bottom' },
-                hAxis: { title: 'Data e Hora' },
+                hAxis: { title: 'Data e Hora', format: 'yyyy/MM/dd HH:mm', slantedText: true },
                 vAxis: { title: 'Valor' },
-                // Define um conjunto de cores; ajuste conforme o número de dispositivos
                 colors: ['#3e8914', '#FF0000', '#0000FF', '#FF9900'],
                 backgroundColor: '#f8f9fa',
                 chartArea: { backgroundColor: '#f8f9fa' }
             };
 
-            var chart = new google.visualization.LineChart(document.getElementById('chart_' + sensor));
+            // Alterado para gráfico de coluna
+            var chart = new google.visualization.ColumnChart(document.getElementById('chart_' + sensor));
             chart.draw(data, options);
         }
+
     </script>
     <nav class="navbar navbar-expand-lg bg-body-tertiary custom-navbar">
         <div class="container-fluid">
