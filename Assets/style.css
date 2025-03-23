@@ -1,6 +1,6 @@
 /* NAVBAR CSS */
 .navbar {
-    background: linear-gradient(135deg, #2c5a1d, #3e8914);; 
+    background: linear-gradient(135deg, #2c5a1d, #3e8914); 
     height: 60px; /* Ou qualquer altura desejada para a navbar */
     padding: 0; /* Remove o preenchimento padrão */
     line-height: 60px; /* Alinha o texto no meio da navbar */
@@ -347,4 +347,30 @@ google-charts {
     }
     
 }
+
+/* Estilos para o footer */
+.site-footer {
+    background: linear-gradient(135deg, #2c5a1d, #3e8914);
+    color: #ffffff;
+    width: 100%;
+    margin-top: auto;
+    padding: 40px 0; /* Aumenta a altura */
+    
+    /* Centraliza o conteúdo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.site-footer p {
+    margin: 0;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.site-footer .container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
 
