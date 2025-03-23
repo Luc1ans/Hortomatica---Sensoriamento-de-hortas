@@ -302,7 +302,14 @@ form .btn-logout:hover {
     background-color: rgba(197, 240, 199, 0.3);
 }
 
-
+.btn-login{
+    background-color: #3e8914;
+    color: white;
+}
+.btn-login:hover{
+    background-color: #218838;
+    color: white;
+}
 /* Ajustes para gráficos */
 google-charts {
     border-radius: 8px;
