@@ -17,15 +17,16 @@ class DispositivoController
         $stmt->bindParam(':id', $idDispositivo, PDO::PARAM_INT);
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         if (!$result) {
             return ['nome_dispositivo' => 'Desconhecido'];
         }
         return $result;
     }
-    
+
     public function updateDispositivo($idDispositivo, $nome, $status, $data_instalacao, $userId)
     {
+
         $sql = "UPDATE dispositivo 
             SET nome_dispositivo = :nome_dispositivo, 
                 status = :status, 
@@ -63,7 +64,6 @@ class DispositivoController
         $stmt->bindParam(':idDispositivo', $idDispositivo);
         return $stmt->execute();
     }
-
     public function getAllDispositivosid($userId)
     {
         $sql = "SELECT idDispositivo, nome_dispositivo, localizacao, status, data_instalacao FROM dispositivo WHERE user_id = :user_id";
@@ -72,6 +72,7 @@ class DispositivoController
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
     public function getDispositivoByHorta($idHorta)
     {

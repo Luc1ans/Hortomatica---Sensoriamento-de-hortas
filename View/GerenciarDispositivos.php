@@ -47,6 +47,7 @@ $dispositivos = $controller->getAllDispositivos();
 $dispositivosIDs = $controller->getAllDispositivosid($usuarioId);
 ?>
 
+
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -107,13 +108,36 @@ $dispositivosIDs = $controller->getAllDispositivosid($usuarioId);
                                 <strong>Data de Instalação:</strong>
                                 <?= htmlspecialchars($dispositivosID['data_instalacao'], ENT_QUOTES, 'UTF-8'); ?>
                             </p>
+                            <!-- Botão para abrir o modal de confirmação de exclusão -->
+                            <button class="btn btn-danger btn-action"
+                                onclick="document.getElementById('modalExcluir<?= $dispositivosID['idDispositivo']; ?>').style.display='block'">
+                                <i class="bi bi-trash"></i> Excluir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal de confirmação para exclusão do dispositivo -->
+                <div id="modalExcluir<?= $dispositivosID['idDispositivo']; ?>" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Confirmar Exclusão</h3>
+                        </div>
+                        <div class="modal-body">
+                            <p>Tem certeza que deseja excluir o dispositivo
+                                "<strong><?= htmlspecialchars($dispositivosID['nome_dispositivo'], ENT_QUOTES, 'UTF-8'); ?></strong>"?
+                            </p>
+                        </div>
+                        <div class="modal-footer">
                             <form action="" method="POST" class="d-inline">
                                 <input type="hidden" name="acao" value="excluir">
                                 <input type="hidden" name="idDispositivo" value="<?= $dispositivosID['idDispositivo']; ?>">
-                                <button type="submit" class="btn btn-danger btn-action">
-                                    <i class="bi bi-trash"></i> Excluir
-                                </button>
+                                <button type="submit" class="btn btn-danger">Excluir</button>
                             </form>
+                            <button type="button" class="btn btn-secondary"
+                                onclick="document.getElementById('modalExcluir<?= $dispositivosID['idDispositivo']; ?>').style.display='none'">
+                                Cancelar
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -146,6 +170,7 @@ $dispositivosIDs = $controller->getAllDispositivosid($usuarioId);
                                 <?php endforeach; ?>
                             </select>
                         </div>
+
                         <div class="mb-3">
                             <label for="nome" class="form-label">Nome</label>
                             <input type="text" id="nome" name="nome" class="form-control" required>
@@ -164,13 +189,21 @@ $dispositivosIDs = $controller->getAllDispositivosid($usuarioId);
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-success">Adicionar</button>
                             <button type="button" class="btn btn-secondary"
-                                onclick="document.getElementById('modalAdicionar').style.display='none'">Cancelar</button>
+                                onclick="document.getElementById('modalAdicionar').style.display='none'">
+                                Cancelar
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2025 Hortomática. Todos os direitos reservados.</p>
+        </div>
+    </footer>
 
     <script>
         window.onclick = function (event) {

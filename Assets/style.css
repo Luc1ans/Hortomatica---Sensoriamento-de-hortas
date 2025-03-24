@@ -91,8 +91,10 @@ body {
     text-align: center;
     width: 100%;
     max-width: 600px;
+    max-height: 500px;
     margin: 0 auto;
     justify-items: center;
+    
 }
 
 .btn-home, .nav-link {
@@ -354,7 +356,7 @@ google-charts {
     color: #ffffff;
     width: 100%;
     margin-top: auto;
-    padding: 40px 0; /* Aumenta a altura */
+    padding: 40px 0; 
     
     /* Centraliza o conteúdo */
     display: flex;
@@ -372,5 +374,13 @@ google-charts {
     max-width: 1200px;
     margin: 0 auto;
 }
+
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
 
 
