@@ -4,6 +4,11 @@ require_once('../Controller/DispositivoController.php');
 require_once('../Controller/LeituraSensores.php');
 require_once('../Assets/Auth.php');
 require_once('../Assets/Logout.php');
+if (isset($_GET['gerar_pdf'])) {
+    header("Location: gerar_pdf.php?idHorta=" . urlencode($idHorta));
+    exit();
+}
+
 
 $pdo = Database::connect();
 $controller = new DispositivoController($pdo);
@@ -122,6 +127,7 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
             // Alterado para gráfico de coluna
             var chart = new google.visualization.ColumnChart(document.getElementById('chart_' + sensor));
             chart.draw(data, options);
+
         }
 
     </script>
@@ -227,11 +233,18 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
                                 <i class="bi bi-arrow-clockwise"></i>
                             </a>
                         </div>
+                        <form method="GET" action="../Assets/gerar_pdf.php">
+                            <a href="../Assets/gerar_pdf.php?idHorta=<?= htmlspecialchars($idHorta) ?>&dispositivos=<?= htmlspecialchars(implode(',', $dispositivosSelecionados)) ?>&sensor=<?= htmlspecialchars($filtroSensor) ?>&data_inicial=<?= htmlspecialchars($filtroDataInicial) ?>&data_final=<?= htmlspecialchars($filtroDataFinal) ?>"
+                                class="btn btn-danger btn-action" target="_blank"
+                                style="width: auto; min-width: 150px;">
+                                <i class="bi bi-file-earmark-pdf me-2"></i> Gerar PDF
+                            </a>
+                        </form>
+
                     </div>
                 </form>
             </div>
         </div>
-
         <!-- Gráficos -->
         <div class="card mb-4 shadow-sm">
             <div class="card-body">
