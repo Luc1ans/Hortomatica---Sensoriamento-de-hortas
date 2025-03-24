@@ -70,14 +70,14 @@ foreach ($hortas as $horta) {
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="..\Assets\style.css">
+    <link rel="stylesheet" href="../Assets/style.css">
     <title>Hortomática - Gerenciar Hortas</title>
     <nav class="navbar navbar-expand-lg bg-body-tertiary custom-navbar">
         <div class="container-fluid">
@@ -91,8 +91,7 @@ foreach ($hortas as $horta) {
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                 <div class="navbar-nav">
                     <a class="nav-link navbar-text" aria-current="page" href="GerenciarHortas.php">Gerenciar Hortas</a>
-                    <a class="nav-link navbar-text" aria-current="page" href="GerenciarDispositivos.php">Gerenciar
-                        Dispositivos</a>
+                    <a class="nav-link navbar-text" aria-current="page" href="GerenciarDispositivos.php">Gerenciar Dispositivos</a>
                     <a class="nav-link navbar-text" aria-current="page" href="Relatorio.php">Relatórios</a>
                 </div>
                 <div class="ms-auto">
@@ -114,7 +113,8 @@ foreach ($hortas as $horta) {
                     <div class="card h-100 card-hover">
                         <div class="card-body">
                             <h5 class="card-title text-success">
-                                <?= htmlspecialchars($horta['nome_horta'], ENT_QUOTES, 'UTF-8'); ?></h5>
+                                <?= htmlspecialchars($horta['nome_horta'], ENT_QUOTES, 'UTF-8'); ?>
+                            </h5>
                             <p class="card-text">
                                 <strong>Plantações:</strong>
                                 <?= htmlspecialchars($horta['plantacoes'], ENT_QUOTES, 'UTF-8'); ?><br>
@@ -122,13 +122,11 @@ foreach ($hortas as $horta) {
                                 <?= htmlspecialchars($horta['observacoes'], ENT_QUOTES, 'UTF-8'); ?>
                             </p>
                             <div class="d-flex justify-content-between mb-3">
-                                <form action="" method="POST" class="d-inline">
-                                    <input type="hidden" name="acao" value="excluir">
-                                    <input type="hidden" name="idHorta" value="<?= $horta['idHorta']; ?>">
-                                    <button type="submit" class="btn btn-danger btn-action">
-                                        <i class="bi bi-trash"></i> Excluir
-                                    </button>
-                                </form>
+                                <!-- Botão que abre o modal de confirmação de exclusão -->
+                                <button class="btn btn-danger btn-action"
+                                    onclick="document.getElementById('modalExcluir<?= $horta['idHorta']; ?>').style.display='block'">
+                                    <i class="bi bi-trash"></i> Excluir
+                                </button>
                                 <button class="btn btn-warning btn-action"
                                     onclick="document.getElementById('modal<?= $horta['idHorta']; ?>').style.display='block'">
                                     <i class="bi bi-pencil"></i> Editar
@@ -140,7 +138,6 @@ foreach ($hortas as $horta) {
                                     onclick="document.getElementById('modalAdicionarDispositivo<?= $horta['idHorta']; ?>').style.display='block'">
                                     <i class="bi bi-plus-circle"></i> Adicionar dispositivo
                                 </button>
-                                <!-- Se houver dispositivos vinculados, exibe também o botão para visualizar -->
                                 <?php if (isset($dispositivosVinculados[$horta['idHorta']]) && !empty($dispositivosVinculados[$horta['idHorta']])): ?>
                                     <a href="AnaliseDados.php?idHorta=<?= htmlspecialchars($horta['idHorta'], ENT_QUOTES, 'UTF-8'); ?>"
                                         class="btn btn-success btn-action w-100">
@@ -148,6 +145,31 @@ foreach ($hortas as $horta) {
                                     </a>
                                 <?php endif; ?>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal para confirmar exclusão -->
+                <div id="modalExcluir<?= $horta['idHorta']; ?>" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Confirmar Exclusão</h3>
+                        </div>
+                        <div class="modal-body">
+                            <p>Tem certeza que deseja excluir a horta
+                            "<strong><?= htmlspecialchars($horta['nome_horta'], ENT_QUOTES, 'UTF-8'); ?></strong>"?
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <form action="" method="POST" class="d-inline">
+                                <input type="hidden" name="acao" value="excluir">
+                                <input type="hidden" name="idHorta" value="<?= $horta['idHorta']; ?>">
+                                <button type="submit" class="btn btn-danger">Excluir</button>
+                            </form>
+                            <button type="button" class="btn btn-secondary"
+                                onclick="document.getElementById('modalExcluir<?= $horta['idHorta']; ?>').style.display='none'">
+                                Cancelar
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -166,8 +188,7 @@ foreach ($hortas as $horta) {
                                     <label for="idDispositivo" class="form-label">Selecionar ID do dispositivo</label>
                                     <select name="idDispositivo" class="form-control" required>
                                         <?php foreach ($dispositivoadd as $dispositivo): ?>
-                                            <option
-                                                value="<?= htmlspecialchars($dispositivo['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>">
+                                            <option value="<?= htmlspecialchars($dispositivo['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>">
                                                 <?= htmlspecialchars($dispositivo['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -209,7 +230,8 @@ foreach ($hortas as $horta) {
                             <button type="submit" class="btn btn-success">Salvar</button>
                             <button type="button" class="btn btn-secondary"
                                 onclick="document.getElementById('modal<?= $horta['idHorta']; ?>').style.display='none'">
-                                Cancelar</button>
+                                Cancelar
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -263,5 +285,9 @@ foreach ($hortas as $horta) {
         </script>
     </div>
 </body>
-
+<footer class="site-footer">
+    <div class="container">
+        <p>&copy; 2025 Hortomática. Todos os direitos reservados.</p>
+    </div>
+</footer>
 </html>
