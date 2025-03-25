@@ -352,35 +352,115 @@ google-charts {
 
 /* Estilos para o footer */
 .site-footer {
-    background: linear-gradient(135deg, #2c5a1d, #3e8914);
+    background: linear-gradient(135deg, #1a3d12, #2c5a1d);
     color: #ffffff;
-    width: 100%;
+    padding: 60px 0 20px;
+    border-top: 3px solid rgba(255, 255, 255, 0.1);
     margin-top: auto;
-    padding: 40px 0; 
-    
-    /* Centraliza o conteúdo */
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto 40px;
+}
+
+.footer-section {
+    padding: 0 20px;
+}
+
+.footer-title {
+    color: #a3d95f;
+    border-bottom: 2px solid #3e8914;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+}
+
+.footer-links li {
+    margin-bottom: 10px;
+}
+
+.footer-links a {
+    color: #d1e8c6;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: #ffffff;
+    padding-left: 5px;
+}
+
+.apoio-logos {
     display: flex;
-    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
     align-items: center;
 }
 
-.site-footer p {
-    margin: 0;
-    font-size: 0.9rem;
+.apoio-logo {
+    width: 80px;
+    height: auto;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.apoio-logo:hover {
+    filter: none;
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.social-links {
+    display: flex;
+    gap: 15px;
+}
+
+.social-icon {
+    color: #d1e8c6;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.social-icon:hover {
+    color: #ffffff;
+    transform: translateY(-3px);
+}
+
+.footer-bottom {
+    border-top: 1px solid rgba(35, 16, 16, 0.1);
+    padding-top: 30px;
     text-align: center;
 }
 
-.site-footer .container {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-html, body {
-    height: 100%;
+.copyright {
+    font-size: 0.9rem;
+    color: #c4d8b7;
+    line-height: 1.6;
     margin: 0;
-    display: flex;
-    flex-direction: column;
 }
 
+@media (max-width: 768px) {
+    .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    
+    .footer-links {
+        margin-bottom: 30px;
+    }
+    
+    .apoio-logos {
+        justify-content: center;
+    }
+    
+    .social-links {
+        justify-content: center;
+    }
+}
 
 
