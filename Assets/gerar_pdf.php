@@ -1,25 +1,32 @@
 <?php
-// gerar_pdf.php
-
-require_once '../vendor/autoload.php'; // ajuste para o caminho correto do autoload do DomPDF
+require_once '../vendor/autoload.php'; 
 require_once __DIR__ . '/../Controller/Database.php';
 require_once('../Controller/DispositivoController.php');
 require_once('../Controller/LeituraSensores.php');
 
-if (!isset($_GET['idHorta'])) {
+if (!isset($_POST['idHorta'])) {
     die("Erro: ID da horta não foi fornecido.");
 }
 
-$idHorta = $_GET['idHorta'];
-$dispositivosSelecionados = isset($_GET['dispositivos']) ? explode(',', $_GET['dispositivos']) : [];
-$filtroSensor = $_GET['sensor'] ?? '';
-$filtroDataInicial = $_GET['data_inicial'] ?? '';
-$filtroDataFinal = $_GET['data_final'] ?? '';
+$idHorta = $_POST['idHorta'];
+$dispositivosSelecionados = isset($_POST['dispositivos']) ? explode(',', $_POST['dispositivos']) : [];
+$filtroSensor = $_POST['sensor'] ?? '';
+$filtroDataInicial = $_POST['data_inicial'] ?? '';
+$filtroDataFinal = $_POST['data_final'] ?? '';
+
 
 // Conecta ao banco e busca os dados
 $pdo = Database::connect();
 $controller = new DispositivoController($pdo);
 $leituraController = new LeituraSensores();
+
+$chartImages = [];
+foreach ($_POST as $key => $value) {
+    if (strpos($key, 'img_') === 0) {
+        $sensorName = str_replace("img_", "", $key);
+        $chartImages[$sensorName] = $value;
+    }
+}
 
 // Obtém leituras filtradas (replicar lógica da página de análise)
 $leituras = [];
