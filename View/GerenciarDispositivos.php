@@ -199,12 +199,6 @@ $dispositivosIDs = $controller->getAllDispositivosid($usuarioId);
         </div>
     </div>
 
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2025 Hortomática. Todos os direitos reservados.</p>
-        </div>
-    </footer>
-
     <script>
         window.onclick = function (event) {
             var modals = document.getElementsByClassName('modal');

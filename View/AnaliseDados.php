@@ -91,14 +91,14 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
     <link rel="stylesheet" href="..\Assets\style.css">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-        // Carrega a biblioteca do Google Charts e desenha os gráficos após o carregamento
+        
         google.charts.load('current', { 'packages': ['corechart'] });
         google.charts.setOnLoadCallback(drawCharts);
 
         function drawCharts() {
             var chartData = <?php echo json_encode($chartData); ?>;
             var dispositivosSelecionados = <?php echo json_encode($dispositivosSelecionados); ?>;
-            // Para cada sensor, chama a função para desenhar o gráfico
+        
             for (var sensor in chartData) {
                 drawChart(sensor, chartData[sensor], dispositivosSelecionados);
             }
@@ -106,14 +106,14 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
 
         function drawChart(sensor, rows, dispositivos) {
             var data = new google.visualization.DataTable();
-            data.addColumn('datetime', 'Data e Hora'); // Mantém o uso de datetime
+            data.addColumn('datetime', 'Data e Hora'); 
 
             for (var i = 0; i < dispositivos.length; i++) {
                 data.addColumn('number', 'Dispositivo ' + dispositivos[i]);
             }
 
             var formattedRows = rows.map(row => {
-                var dateTime = new Date(row[0]); // Converte string para objeto Date
+                var dateTime = new Date(row[0]); 
                 return [dateTime, ...row.slice(1)];
             });
 
@@ -129,11 +129,11 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
                 chartArea: { backgroundColor: '#f8f9fa' }
             };
 
-            // Alterado para gráfico de coluna
-            var chart = new google.visualization.ColumnChart(document.getElementById('chart_' + sensor));
+          
+            var chart = new google.visualization.LineChart(document.getElementById('chart_' + sensor));
             chart.draw(data, options);
 
-            // Captura a URI da imagem e armazena em um campo oculto
+           
             var imgUri = chart.getImageURI();
             var inputId = 'img_' + sensor.replace(/\s+/g, '_');
             var input = document.getElementById(inputId);

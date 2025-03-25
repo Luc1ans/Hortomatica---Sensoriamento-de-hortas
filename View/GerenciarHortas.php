@@ -285,9 +285,5 @@ foreach ($hortas as $horta) {
         </script>
     </div>
 </body>
-<footer class="site-footer">
-    <div class="container">
-        <p>&copy; 2025 Hortomática. Todos os direitos reservados.</p>
-    </div>
-</footer>
+
 </html>
