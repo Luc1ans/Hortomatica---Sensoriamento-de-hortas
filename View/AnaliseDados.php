@@ -88,17 +88,17 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
     <title>Análise de Dados</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="..\Assets\style.css">
+    <link rel="stylesheet" href="..\Assets\css\style.css">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-        
+
         google.charts.load('current', { 'packages': ['corechart'] });
         google.charts.setOnLoadCallback(drawCharts);
 
         function drawCharts() {
             var chartData = <?php echo json_encode($chartData); ?>;
             var dispositivosSelecionados = <?php echo json_encode($dispositivosSelecionados); ?>;
-        
+
             for (var sensor in chartData) {
                 drawChart(sensor, chartData[sensor], dispositivosSelecionados);
             }
@@ -106,14 +106,14 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
 
         function drawChart(sensor, rows, dispositivos) {
             var data = new google.visualization.DataTable();
-            data.addColumn('datetime', 'Data e Hora'); 
+            data.addColumn('datetime', 'Data e Hora');
 
             for (var i = 0; i < dispositivos.length; i++) {
                 data.addColumn('number', 'Dispositivo ' + dispositivos[i]);
             }
 
             var formattedRows = rows.map(row => {
-                var dateTime = new Date(row[0]); 
+                var dateTime = new Date(row[0]);
                 return [dateTime, ...row.slice(1)];
             });
 
@@ -129,11 +129,11 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
                 chartArea: { backgroundColor: '#f8f9fa' }
             };
 
-          
+
             var chart = new google.visualization.LineChart(document.getElementById('chart_' + sensor));
             chart.draw(data, options);
 
-           
+
             var imgUri = chart.getImageURI();
             var inputId = 'img_' + sensor.replace(/\s+/g, '_');
             var input = document.getElementById(inputId);
@@ -149,31 +149,7 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
         }
 
     </script>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary custom-navbar">
-        <div class="container-fluid">
-            <a class="navbar-brand navbar-text" href="index.php">
-                <img src="..\Assets\image\logo branca.png" alt="Logo Hortomática" class="navbar-logo">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
-                aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-                <div class="navbar-nav">
-                    <a class="nav-link navbar-text" href="GerenciarHortas.php">Gerenciar Hortas</a>
-                    <a class="nav-link navbar-text" href="GerenciarDispositivos.php">Gerenciar Dispositivos</a>
-                    <a class="nav-link navbar-text" href="Relatorio.php">Relatórios</a>
-                </div>
-                <div class="ms-auto">
-                    <form action="" method="POST" class="d-inline">
-                        <button type="submit" name="logout" class="btn btn-logout">
-                            <i class="bi bi-box-arrow-right"></i> Logout
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <?php include '../Assets/navbar.php'; ?>
 </head>
 
 <body>
@@ -378,12 +354,6 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
         </div>
 
     </div>
+    <?php include '../Assets/footer.php'; ?>
 </body>
-
-<footer class="site-footer">
-    <div class="container">
-        <p>&copy; 2025 Hortomática. Todos os direitos reservados.</p>
-    </div>
-</footer>
-
 </html>
