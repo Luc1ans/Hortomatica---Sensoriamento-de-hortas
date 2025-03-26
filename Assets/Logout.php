@@ -1,6 +1,5 @@
 <?php
 
-
 // Verifica se o usuário clicou no botão de logout
 if (isset($_POST['logout'])) {
     // Destrói todas as variáveis de sessão

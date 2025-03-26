@@ -56,32 +56,9 @@ $dispositivosIDs = $controller->getAllDispositivosid($usuarioId);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../Assets/style.css">
+    <link rel="stylesheet" href="../Assets/css/style.css">
     <title>Gerenciar Dispositivos</title>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary custom-navbar">
-        <div class="container-fluid">
-            <a class="navbar-brand navbar-text" href="index.php">
-                <img src="..\Assets\image\logo branca.png" alt="Logo Hortomática" class="navbar-logo">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
-                aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-                <div class="navbar-nav">
-                    <a class="nav-link navbar-text" aria-current="page" href="GerenciarHortas.php">Gerenciar Hortas</a>
-                    <a class="nav-link navbar-text" aria-current="page" href="GerenciarDispositivos.php">Gerenciar
-                        Dispositivos</a>
-                    <a class="nav-link navbar-text" aria-current="page" href="Relatorio.php">Relatórios</a>
-                </div>
-                <div class="ms-auto">
-                    <form action="" method="POST" class="d-inline">
-                        <button type="submit" name="logout" class="btn btn-logout">Logout</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <?php include '../Assets/navbar.php'; ?>
 </head>
 
 <body>
@@ -144,7 +121,7 @@ $dispositivosIDs = $controller->getAllDispositivosid($usuarioId);
             <?php endforeach; ?>
         </div>
 
-        <button class="btn btn-primary btn-lg btn-add"
+        <button class="btn btn-primary btn-lg btn-add mb-5"
             onclick="document.getElementById('modalAdicionar').style.display='block'">
             <i class="bi bi-plus-lg"></i> Adicionar Dispositivo
         </button>
@@ -209,6 +186,7 @@ $dispositivosIDs = $controller->getAllDispositivosid($usuarioId);
             }
         }
     </script>
+    <?php include '../Assets/footer.php'; ?>
 </body>
 
 </html>

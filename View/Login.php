@@ -37,18 +37,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="..\Assets\style.css">
+    <link rel="stylesheet" href="..\Assets\css\style.css">
+    <?php include '../Assets/navbar.php'; ?>
     <title>Login - Hortomática</title>
 </head>
+
 <body>
     <div class="container d-flex flex-column align-items-center justify-content-center vh-100">
         <div class="card p-4 shadow" style="width: 100%; max-width: 400px;">
             <h1 class="text-center mb-4">Login</h1>
-            
+
             <?php
             // Exibe a mensagem de erro caso exista
             if (isset($_SESSION['error_message'])) {
@@ -60,11 +63,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form action="login.php" method="POST"> <!-- Ação do próprio arquivo -->
                 <div class="mb-3">
                     <label for="email" class="form-label">E-mail</label>
-                    <input type="email" class="form-control" id="email" name="email" placeholder="Digite seu e-mail" required>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Digite seu e-mail"
+                        required>
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Senha</label>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Digite sua senha" required>
+                    <input type="password" class="form-control" id="password" name="password"
+                        placeholder="Digite sua senha" required>
                 </div>
                 <button type="submit" class="btn btn-login w-100">Entrar</button>
                 <div class="text-center mt-3">
@@ -74,12 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <?php include '../Assets/footer.php'; ?>
 </body>
 
-<footer class="site-footer">
-    <div class="container">
-        <p>&copy; 2025 Hortomática. Todos os direitos reservados.</p>
-    </div>
-</footer>
 
 </html>
