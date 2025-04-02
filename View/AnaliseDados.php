@@ -1,14 +1,14 @@
 <?php
 require_once __DIR__ . '/../Controller/Database.php';
-require_once('../Controller/DispositivoController.php');
-require_once('../Controller/LeituraSensores.php');
-require_once('../Assets/Auth.php');
-require_once('../Assets/Logout.php');
+require_once(__DIR__ . '/../Controller/DispositivoController.php');
+require_once(__DIR__ . '/../Controller/LeituraSensores.php');
+require_once(__DIR__ . '/../Assets/Auth.php');
+require_once(__DIR__ . '/../Assets/Logout.php');
+
 if (isset($_POST['gerar_pdf'])) {
     header("Location: gerar_pdf.php?idHorta=" . urlencode($idHorta));
     exit();
 }
-
 
 $pdo = Database::connect();
 $controller = new DispositivoController($pdo);
@@ -34,12 +34,11 @@ if (isset($_GET['dispositivos'])) {
     }, $dispositivosIDs);
 }
 
-
 $filtroSensor = $_GET['sensor'] ?? '';
 $filtroDataInicial = $_GET['data_inicial'] ?? '';
 $filtroDataFinal = $_GET['data_final'] ?? '';
 
-// Recupera leituras de cada dispositivo selecionado e mescla os resultados
+// Recupera as leituras de cada dispositivo selecionado e mescla os resultados
 $leituras = [];
 $ultimasLeituras = [];
 foreach ($dispositivosSelecionados as $idDisp) {
@@ -67,7 +66,7 @@ foreach ($leituras as $leitura) {
 // Prepara os dados para os gráficos: para cada sensor, cria linhas com a data/hora e uma coluna para cada dispositivo selecionado
 $chartData = [];
 foreach ($leiturasPorSensor as $sensor => $dataByTime) {
-    ksort($dataByTime);
+    ksort($dataByTime); // Ordena os timestamps
     $rows = [];
     foreach ($dataByTime as $timestamp => $deviceValues) {
         $row = [$timestamp];
@@ -88,17 +87,15 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
     <title>Análise de Dados</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="..\Assets\css\style.css">
+    <link rel="stylesheet" href="../Assets/css/style.css">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-
         google.charts.load('current', { 'packages': ['corechart'] });
         google.charts.setOnLoadCallback(drawCharts);
 
         function drawCharts() {
             var chartData = <?php echo json_encode($chartData); ?>;
             var dispositivosSelecionados = <?php echo json_encode($dispositivosSelecionados); ?>;
-
             for (var sensor in chartData) {
                 drawChart(sensor, chartData[sensor], dispositivosSelecionados);
             }
@@ -107,16 +104,13 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
         function drawChart(sensor, rows, dispositivos) {
             var data = new google.visualization.DataTable();
             data.addColumn('datetime', 'Data e Hora');
-
             for (var i = 0; i < dispositivos.length; i++) {
                 data.addColumn('number', 'Dispositivo ' + dispositivos[i]);
             }
-
             var formattedRows = rows.map(row => {
                 var dateTime = new Date(row[0]);
                 return [dateTime, ...row.slice(1)];
             });
-
             data.addRows(formattedRows);
 
             var options = {
@@ -129,11 +123,10 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
                 chartArea: { backgroundColor: '#f8f9fa' }
             };
 
-
             var chart = new google.visualization.LineChart(document.getElementById('chart_' + sensor));
             chart.draw(data, options);
 
-
+            // Se desejar gerar a URI da imagem (por exemplo, para o PDF)
             var imgUri = chart.getImageURI();
             var inputId = 'img_' + sensor.replace(/\s+/g, '_');
             var input = document.getElementById(inputId);
@@ -145,9 +138,7 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
                 document.getElementById("chartImages").appendChild(input);
             }
             input.value = imgUri;
-
         }
-
     </script>
     <?php include '../Assets/navbar.php'; ?>
 </head>
@@ -158,13 +149,10 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
 
         <div class="card mb-4 shadow-sm">
             <div class="card-body">
-                <h5 class="card-title mb-4 text-success">
-                    <i class="bi bi-check2-square me-2"></i>Filtrar leituras
-                </h5>
+                <h5 class="card-title mb-4 text-success"><i class="bi bi-check2-square me-2"></i>Filtrar Leituras</h5>
                 <!-- Formulário de Filtro (Método GET) -->
                 <form method="GET" action="AnaliseDados.php">
                     <input type="hidden" name="idHorta" value="<?= htmlspecialchars($idHorta, ENT_QUOTES, 'UTF-8'); ?>">
-
                     <!-- Lista de Dispositivos -->
                     <div class="mb-3">
                         <label class="form-label">Dispositivos:</label>
@@ -183,7 +171,6 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
                             <?php endforeach; ?>
                         </div>
                     </div>
-
                     <!-- Filtros adicionais -->
                     <div class="row g-3 mb-3">
                         <div class="col-12 col-md-4">
@@ -211,7 +198,6 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
                                 value="<?= htmlspecialchars($filtroDataFinal, ENT_QUOTES, 'UTF-8'); ?>">
                         </div>
                     </div>
-
                     <!-- Botões de ação -->
                     <div class="d-flex gap-3">
                         <button type="submit" class="btn btn-primary btn-action" style="width: 120px;">
@@ -228,26 +214,40 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
 
                 <!-- Formulário para Gerar PDF (Método POST) -->
                 <form id="pdfForm" method="POST" action="../Assets/gerar_pdf.php" target="_blank">
-                    <input type="hidden" name="idHorta" value="<?= htmlspecialchars($idHorta) ?>">
+                    <input type="hidden" name="idHorta" value="<?= htmlspecialchars($idHorta); ?>">
                     <input type="hidden" name="dispositivos"
-                        value="<?= htmlspecialchars(implode(',', $dispositivosSelecionados)) ?>">
-                    <input type="hidden" name="sensor" value="<?= htmlspecialchars($filtroSensor) ?>">
-                    <input type="hidden" name="data_inicial" value="<?= htmlspecialchars($filtroDataInicial) ?>">
-                    <input type="hidden" name="data_final" value="<?= htmlspecialchars($filtroDataFinal) ?>">
-                    <!-- Container para armazenar as URIs dos gráficos (preenchido via JavaScript) -->
+                        value="<?= htmlspecialchars(implode(',', $dispositivosSelecionados)); ?>">
+                    <input type="hidden" name="sensor" value="<?= htmlspecialchars($filtroSensor); ?>">
+                    <input type="hidden" name="data_inicial" value="<?= htmlspecialchars($filtroDataInicial); ?>">
+                    <input type="hidden" name="data_final" value="<?= htmlspecialchars($filtroDataFinal); ?>">
                     <div id="chartImages" style="display: none;"></div>
                     <button type="submit" class="btn btn-danger btn-action" style="width: auto; min-width: 150px;">
                         <i class="bi bi-file-earmark-pdf me-2"></i> Gerar PDF
                     </button>
                 </form>
+                <!-- Formulário para Importar CSV -->
+                <div class="col-md-6">
+                    <div class="p-3 border rounded">
+                        <form id="CSVform" action="../Assets/importCSV.php" method="POST" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="csvFile" class="form-label">Importar CSV</label>
+                                <input type="file" name="csvFile" id="csvFile" accept=".csv" class="form-control">
+                            </div>
+                            <input type="hidden" name="idHorta"
+                                value="<?= htmlspecialchars($_GET['idHorta'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-upload me-2"></i> Importar CSV
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Gráficos -->
         <div class="card mb-4 shadow-sm">
             <div class="card-body">
-                <h5 class="card-title mb-4 text-success"><i class="bi bi-bar-chart-line me-2"></i>Gráficos das
-                    Leituras
+                <h5 class="card-title mb-4 text-success"><i class="bi bi-bar-chart-line me-2"></i>Gráficos das Leituras
                 </h5>
                 <div class="row g-4">
                     <?php foreach ($chartData as $sensor => $rows): ?>
@@ -284,14 +284,11 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
                                     <?php if (!empty($ultimasLeituras)): ?>
                                         <?php foreach ($ultimasLeituras as $leitura): ?>
                                             <tr>
-                                                <td><?= htmlspecialchars($leitura['nome_sensor'], ENT_QUOTES, 'UTF-8'); ?>
-                                                </td>
+                                                <td><?= htmlspecialchars($leitura['nome_sensor'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                 <td><?= htmlspecialchars($leitura['valor_leitura'], ENT_QUOTES, 'UTF-8'); ?>
                                                 </td>
-                                                <td><?= htmlspecialchars($leitura['data_leitura'], ENT_QUOTES, 'UTF-8'); ?>
-                                                </td>
-                                                <td><?= htmlspecialchars($leitura['hora_leitura'], ENT_QUOTES, 'UTF-8'); ?>
-                                                </td>
+                                                <td><?= htmlspecialchars($leitura['data_leitura'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                <td><?= htmlspecialchars($leitura['hora_leitura'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                 <td><?= htmlspecialchars($leitura['Dispositivo_idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>
                                                 </td>
                                             </tr>
@@ -311,8 +308,7 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
             <div class="col-12 col-lg-6">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title mb-4 text-success"><i class="bi bi-table me-2"></i>Leituras
-                            Filtradas</h5>
+                        <h5 class="card-title mb-4 text-success"><i class="bi bi-table me-2"></i>Leituras Filtradas</h5>
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
@@ -328,14 +324,11 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
                                     <?php if (!empty($leituras)): ?>
                                         <?php foreach ($leituras as $leitura): ?>
                                             <tr>
-                                                <td><?= htmlspecialchars($leitura['nome_sensor'], ENT_QUOTES, 'UTF-8'); ?>
-                                                </td>
+                                                <td><?= htmlspecialchars($leitura['nome_sensor'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                 <td><?= htmlspecialchars($leitura['valor_leitura'], ENT_QUOTES, 'UTF-8'); ?>
                                                 </td>
-                                                <td><?= htmlspecialchars($leitura['data_leitura'], ENT_QUOTES, 'UTF-8'); ?>
-                                                </td>
-                                                <td><?= htmlspecialchars($leitura['hora_leitura'], ENT_QUOTES, 'UTF-8'); ?>
-                                                </td>
+                                                <td><?= htmlspecialchars($leitura['data_leitura'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                <td><?= htmlspecialchars($leitura['hora_leitura'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                 <td><?= htmlspecialchars($leitura['Dispositivo_idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>
                                                 </td>
                                             </tr>
@@ -352,8 +345,8 @@ foreach ($leiturasPorSensor as $sensor => $dataByTime) {
                 </div>
             </div>
         </div>
-
     </div>
     <?php include '../Assets/footer.php'; ?>
 </body>
+
 </html>
