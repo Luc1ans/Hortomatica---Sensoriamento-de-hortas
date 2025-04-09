@@ -25,6 +25,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $pdo = Database::connect();
 
+    $query = "
+        SELECT CONCAT(data_leitura, ' ', hora_leitura) AS ultima_leitura 
+        FROM LeituraSensores 
+        WHERE Dispositivo_idDispositivo = :idDispositivo
+        ORDER BY CONCAT(data_leitura, ' ', hora_leitura) DESC 
+        LIMIT 1
+    ";
+    $stmtLast = $pdo->prepare($query);
+    $stmtLast->execute([':idDispositivo' => $idDispositivo]);
+    $row = $stmtLast->fetch(PDO::FETCH_ASSOC);
+    if ($row && !empty($row['ultima_leitura'])) {
+        $ultimaLeitura = new DateTime($row['ultima_leitura']);
+    } else {
+        $ultimaLeitura = null;
+    }
+
     $stmt = $pdo->prepare("
         INSERT INTO LeituraSensores 
             (data_leitura, hora_leitura, nome_sensor, valor_leitura, Dispositivo_idDispositivo, fonte)
@@ -53,6 +69,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             continue;
         }
+
+        $dataHoraCSV = new DateTime(date("Y-m-d H:i:s", strtotime($dataLeitura . ' ' . $horaLeitura)));
+        if ($ultimaLeitura !== null && $dataHoraCSV <= $ultimaLeitura) {
+            continue;
+        }
+
         $sensores = explode(',', $infoSensor);
         foreach ($sensores as $sensorInfo) {
             $parts = explode(':', $sensorInfo, 2);
@@ -66,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $valorFormatado = (float) $valorFormatado;
             }
 
-           
+            // Insere a leitura no banco
             $stmt->execute([
                 ':data_leitura'              => date("Y-m-d", strtotime($dataLeitura)),
                 ':hora_leitura'              => date("H:i:s", strtotime($horaLeitura)),
