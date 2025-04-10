@@ -44,8 +44,6 @@ class DispositivoController
         return $stmt->execute();
     }
 
-
-
     // Função para buscar todos os dispositivos
     public function getAllDispositivos()
     {
