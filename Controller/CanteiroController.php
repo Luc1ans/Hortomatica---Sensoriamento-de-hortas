@@ -36,6 +36,7 @@ class CanteiroController
                     ])
                 ) {
                     $this->pdo->rollBack();
+                    
                     return false;
                 }
             }
@@ -44,7 +45,7 @@ class CanteiroController
             return true;
         } catch (PDOException $e) {
             $this->pdo->rollBack();
-            error_log("Erro ao criar canteiro: " . $e->getMessage());
+            echo "Erro ao criar canteiro: " . $e->getMessage();
             return false;
         }
     }
