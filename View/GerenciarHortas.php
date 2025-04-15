@@ -241,6 +241,37 @@ foreach ($hortas as $horta) {
                                             </button>
                                         </div>
                                     </div>
+                                    <!-- Modal para adicionar dispositivo ao canteiro -->
+                                    <div id="modalDispositivoCanteiro<?= $canteiro['idCanteiros'] ?>" class="modal">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h3>Vincular Dispositivo</h3>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="" method="POST">
+                                                    <input type="hidden" name="acao" value="vincular_dispositivo">
+                                                    <input type="hidden" name="idCanteiros" value="<?= $canteiro['idCanteiros'] ?>">
+                                                    <div class="mb-3">
+                                                        <label>Dispositivo</label>
+                                                        <select name="idDispositivo" class="form-control" required>
+                                                            <?php foreach ($dispositivoadd as $dispositivo): ?>
+                                                                <option value="<?= $dispositivo['idDispositivo'] ?>">
+                                                                    <?= $dispositivo['idDispositivo'] ?>
+                                                                </option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="submit" class="btn btn-success">Vincular</button>
+                                                        <button type="button" class="btn btn-secondary"
+                                                            onclick="document.getElementById('modalDispositivoCanteiro<?= $canteiro['idCanteiros'] ?>').style.display='none'">
+                                                            Cancelar
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 <?php endforeach;
                             endif; ?>
                         </div>
@@ -250,39 +281,6 @@ foreach ($hortas as $horta) {
                                 onclick="document.getElementById('modalCanteiros<?= $horta['idHorta']; ?>').style.display='none'">
                                 Fechar
                             </button>
-                        </div>
-                    </div>
-                </div>
-
-
-                <!-- Modal para adicionar dispositivo ao canteiro -->
-                <div id="modalDispositivoCanteiro<?= $canteiro['idCanteiros'] ?>" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>Vincular Dispositivo</h3>
-                        </div>
-                        <div class="modal-body">
-                            <form action="" method="POST">
-                                <input type="hidden" name="acao" value="vincular_dispositivo">
-                                <input type="hidden" name="idCanteiros" value="<?= $canteiro['idCanteiros'] ?>">
-                                <div class="mb-3">
-                                    <label>Dispositivo</label>
-                                    <select name="idDispositivo" class="form-control" required>
-                                        <?php foreach ($dispositivoadd as $dispositivo): ?>
-                                            <option value="<?= $dispositivo['idDispositivo'] ?>">
-                                                <?= $dispositivo['idDispositivo'] ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="submit" class="btn btn-success">Vincular</button>
-                                    <button type="button" class="btn btn-secondary"
-                                        onclick="document.getElementById('modalDispositivoCanteiro<?= $canteiro['idCanteiros'] ?>').style.display='none'">
-                                        Cancelar
-                                    </button>
-                                </div>
-                            </form>
                         </div>
                     </div>
                 </div>
