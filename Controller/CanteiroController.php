@@ -11,24 +11,39 @@ class CanteiroController
     }
 
     // Cria um novo canteiro vinculado a uma horta
-    public function createCanteiro($idHorta, $cultura, $dataPlantio, $dataColheitaPrevista)
+    public function createCanteiro($idHorta, $culturaArray, $dataPlantioArray, $dataColheitaArray)
     {
         try {
-            $stmt = $this->pdo->prepare("
-                INSERT INTO Canteiro 
-                (idHorta, cultura, data_plantio, data_colheita_prevista) 
-                VALUES (?, ?, ?, ?)
-            ");
+            $this->pdo->beginTransaction();
 
-            $success = $stmt->execute([
-                $idHorta,
-                $cultura,
-                $dataPlantio,
-                $dataColheitaPrevista
-            ]);
+            foreach ($culturaArray as $index => $cultura) {
+                
+                $dataPlantio = $dataPlantioArray[$index] ?? null;
+                $dataColheita = $dataColheitaArray[$index] ?? null;
 
-            return $success ? $this->pdo->lastInsertId() : false;
+                $stmt = $this->pdo->prepare("
+                   INSERT INTO canteiros 
+                    (horta_idHorta, Cultura, DataPlantio, DataColheira)
+                    VALUES (?, ?, ?, ?)
+                ");
+
+                if (
+                    !$stmt->execute([
+                        $idHorta,
+                        $cultura,
+                        $dataPlantio,
+                        $dataColheita
+                    ])
+                ) {
+                    $this->pdo->rollBack();
+                    return false;
+                }
+            }
+
+            $this->pdo->commit();
+            return true;
         } catch (PDOException $e) {
+            $this->pdo->rollBack();
             error_log("Erro ao criar canteiro: " . $e->getMessage());
             return false;
         }
@@ -39,8 +54,8 @@ class CanteiroController
     {
         try {
             $stmt = $this->pdo->prepare("
-                SELECT * FROM Canteiro 
-                WHERE idHorta = ?
+                SELECT * FROM canteiros 
+                WHERE horta_idHorta = ?
             ");
             $stmt->execute([$idHorta]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -67,21 +82,21 @@ class CanteiroController
     }
 
     // Atualiza um canteiro existente
-    public function updateCanteiro($idCanteiro, $cultura, $dataPlantio, $dataColheitaPrevista)
+    public function updateCanteiro($idCanteiro, $Cultura, $DataPlantio, $DataColheita)
     {
         try {
             $stmt = $this->pdo->prepare("
                 UPDATE Canteiro SET
-                    cultura = ?,
-                    data_plantio = ?,
-                    data_colheita_prevista = ?
+                    Cultura = ?,
+                    DataPlantio = ?,
+                    DataColheita = ?
                 WHERE idCanteiro = ?
             ");
 
             return $stmt->execute([
-                $cultura,
-                $dataPlantio,
-                $dataColheitaPrevista,
+                $Cultura,
+                $DataPlantio,
+                $DataColheita,
                 $idCanteiro
             ]);
         } catch (PDOException $e) {
@@ -111,7 +126,7 @@ class CanteiroController
         try {
             $stmt = $this->pdo->prepare("
                 UPDATE Dispositivo 
-                SET idCanteiro = ?
+                SET canteiro_id = ?
                 WHERE idDispositivo = ?
             ");
             return $stmt->execute([$idCanteiro, $idDispositivo]);

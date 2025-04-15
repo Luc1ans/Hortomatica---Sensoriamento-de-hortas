@@ -1,7 +1,7 @@
 <?php
 class Database {
     private static $host = 'localhost';
-    private static $db_name = 'dbhortomatica';
+    private static $db_name = 'hortomaticadb';
     private static $username = 'root';
     private static $password = 'root';
     private static $conn;
