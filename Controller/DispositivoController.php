@@ -72,11 +72,11 @@ class DispositivoController
     }
 
 
-    public function getDispositivoByHorta($idHorta)
+    public function getDispositivoByCanteiro($idCanteiros)
     {
-        $sql = "SELECT * FROM dispositivo WHERE Horta_idHorta = :idHorta";
+        $sql = "SELECT * FROM dispositivo WHERE canteiro_id = :idCanteiros";
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':idHorta', $idHorta, PDO::PARAM_INT);
+        $stmt->bindParam(':idCanteiros', $idCanteiros, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
