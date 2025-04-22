@@ -209,35 +209,50 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
                 </div>
 
                 <!-- Modal: Adicionar Canteiro -->
-                <div id="modalAdicionarCanteiro<?= $horta['idHorta']; ?>" class="modal">
+                <div id="modalAdicionarCanteiro<?= $horta['idHorta']; ?>" class="modal min-modal">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h3>Adicionar Canteiro</h3>
+                            <div class="header-content">
+                                <h3 class="modal-title">Adicionar Canteiro</h3>
+                                <p class="modal-subtitle">Preencha os dados do canteiro</p>
+                            </div>
+                            <button class="close-icon"
+                                onclick="document.getElementById('modalAdicionarCanteiro<?= $horta['idHorta']; ?>').style.display='none'">
+                                &times;
+                            </button>
                         </div>
                         <div class="modal-body">
                             <form action="" method="POST">
                                 <input type="hidden" name="acao" value="adicionar_canteiro">
                                 <input type="hidden" name="idHorta" value="<?= $horta['idHorta']; ?>">
+
                                 <div id="canteiros-container-<?= $horta['idHorta']; ?>">
-                                    <div class="canteiro-group mb-3">
-                                        <div class="mb-3">
-                                            <label>Cultura</label>
-                                            <input type="text" name="cultura[]" class="form-control" required>
+                                    <div class="canteiro-group">
+                                        <div class="form-group mb-3">
+                                            <label for="cultura<?= $horta['idHorta']; ?>" class="form-label">Cultura</label>
+                                            <input type="text" id="cultura<?= $horta['idHorta']; ?>" name="cultura[]"
+                                                class="form-control" required>
                                         </div>
-                                        <div class="mb-3">
-                                            <label>Data de plantio</label>
-                                            <input type="date" name="data_plantio[]" class="form-control" required>
+                                        <div class="form-group mb-3">
+                                            <label for="plantio<?= $horta['idHorta']; ?>" class="form-label">Data de
+                                                plantio</label>
+                                            <input type="date" id="plantio<?= $horta['idHorta']; ?>" name="data_plantio[]"
+                                                class="form-control" required>
                                         </div>
-                                        <div class="mb-3">
-                                            <label>Data de colheita prevista</label>
-                                            <input type="date" name="data_colheita[]" class="form-control" required>
+                                        <div class="form-group mb-3">
+                                            <label for="colheita<?= $horta['idHorta']; ?>" class="form-label">Data de
+                                                colheita prevista</label>
+                                            <input type="date" id="colheita<?= $horta['idHorta']; ?>" name="data_colheita[]"
+                                                class="form-control" required>
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" class="btn btn-secondary mb-3"
+
+                                <button type="button" class="link-button"
                                     onclick="adicionarCanteiroInputs('<?= $horta['idHorta']; ?>')">
-                                    <i class="bi bi-plus-square"></i> Adicionar novo canteiro
+                                    + Adicionar novo canteiro
                                 </button>
+
                                 <div class="modal-footer">
                                     <button type="submit" class="btn btn-success">Salvar</button>
                                     <button type="button" class="btn btn-secondary"
@@ -249,7 +264,6 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
                         </div>
                     </div>
                 </div>
-
                 <!-- Modal: Exibir Canteiros da Horta -->
                 <div id="modalCanteiros<?= $horta['idHorta']; ?>" class="modal min-modal">
                     <div class="modal-content">
