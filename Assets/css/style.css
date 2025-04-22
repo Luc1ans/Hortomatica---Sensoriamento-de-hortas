@@ -463,4 +463,144 @@ google-charts {
     }
 }
 
+/* Estilos para o modal de canteiros */
+.min-modal {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #2d3748;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modal-subtitle {
+    color: #ffffff;
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+}
+
+.close-icon {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #718096;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin: -0.5rem;
+}
+
+.canteiro-item {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.canteiro-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.cultura-name {
+    font-size: 1.125rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.device-count {
+    font-size: 0.875rem;
+    color: #718096;
+    background: #f7fafc;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.timeline {
+    margin: 1rem 0;
+}
+
+.date-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.date-item {
+    font-size: 0.875rem;
+    padding: 0.75rem;
+    background: #f7fafc;
+    border-radius: 6px;
+}
+
+.date-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #718096;
+    margin-bottom: 0.25rem;
+}
+
+.device-list {
+    margin: 1rem 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+}
+
+.device-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.device-item:last-child {
+    border-bottom: none;
+}
+
+.unlink-button {
+    background: none;
+    border: none;
+    color: #e53e3e;
+    cursor: pointer;
+    padding: 0.25rem;
+    font-size: 1.1rem;
+}
+
+.link-button {
+    width: 100%;
+    background: none;
+    border: 1px dashed #cbd5e0;
+    padding: 0.75rem;
+    border-radius: 6px;
+    color: #4299e1;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: all 0.2s;
+}
+
+.link-button:hover {
+    border-color: #4299e1;
+    background: #ebf8ff;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #a0aec0;
+}
+
+.empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
 
