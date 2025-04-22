@@ -14,15 +14,15 @@ if (!isset($_SESSION['user_id'])) {
 
 $usuarioId = $_SESSION['user_id'];
 $pdo = Database::connect();
-$hortaController       = new HortaController($pdo);
+$hortaController = new HortaController($pdo);
 $dispositivoController = new DispositivoController($pdo);
-$canteiroController    = new CanteiroController($pdo);
+$canteiroController = new CanteiroController($pdo);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $acao = $_POST['acao'] ?? '';
 
     if ($acao === 'adicionar') {
-        $nomeHorta   = $_POST['nome'] ?? '';
+        $nomeHorta = $_POST['nome'] ?? '';
         $observacoes = $_POST['observacoes'] ?? '';
 
         if (empty($nomeHorta)) {
@@ -43,17 +43,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             echo "<p style='color: red;'>Erro ao excluir a horta.</p>";
         }
     } elseif ($acao === 'editar') {
-        $idHorta    = $_POST['idHorta'] ?? '';
-        $nomeHorta  = $_POST['nome'] ?? '';
-        $observacoes= $_POST['observacoes'] ?? '';
+        $idHorta = $_POST['idHorta'] ?? '';
+        $nomeHorta = $_POST['nome'] ?? '';
+        $observacoes = $_POST['observacoes'] ?? '';
 
         if (!$hortaController->updateHorta($idHorta, $nomeHorta, $observacoes)) {
             echo "<p style='color: red;'>Erro ao atualizar a horta.</p>";
         }
     } elseif ($acao === 'adicionar_canteiro') {
-        $idHorta      = $_POST['idHorta'] ?? '';
-        $cultura      = $_POST['cultura'] ?? [];
-        $dataPlantio  = $_POST['data_plantio'] ?? [];
+        $idHorta = $_POST['idHorta'] ?? '';
+        $cultura = $_POST['cultura'] ?? [];
+        $dataPlantio = $_POST['data_plantio'] ?? [];
         $dataColheita = $_POST['data_colheita'] ?? [];
 
         if (empty($cultura) || empty($dataPlantio) || empty($dataColheita)) {
@@ -65,14 +65,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     } elseif ($acao === 'vincular_dispositivo') {
         // Vincula dispositivo ao canteiro
-        $idCanteiro   = $_POST['idCanteiros'] ?? '';
-        $idDispositivo= $_POST['idDispositivo'] ?? '';
+        $idCanteiro = $_POST['idCanteiros'] ?? '';
+        $idDispositivo = $_POST['idDispositivo'] ?? '';
 
         if (empty($idCanteiro) || empty($idDispositivo)) {
             echo "<p style='color: red;'>Selecione um canteiro e um dispositivo!</p>";
         } else {
             if (!$canteiroController->linkDispositivo($idCanteiro, $idDispositivo)) {
                 echo "<p style='color: red;'>Erro ao vincular o dispositivo ao canteiro.</p>";
+            }
+        }
+    } elseif ($acao === 'desvincular_dispositivo') {
+        $idDispositivo = (int) ($_POST['idDispositivo'] ?? 0);
+        if (empty($idDispositivo)) {
+            echo "<p style='color: red;'>Identificador de dispositivo inválido.</p>";
+        } else {
+            if (!$canteiroController->unlinkDispositivo($idDispositivo)) {
+                echo "<p style='color: red;'>Erro ao desvincular o dispositivo.</p>";
             }
         }
     }
@@ -83,6 +92,7 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
 
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -92,14 +102,15 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
     <link rel="stylesheet" href="../Assets/css/style.css">
     <?php include '../Assets/navbar.php'; ?>
 </head>
+
 <body>
     <div class="container mt-4">
         <h3 class="mb-4">Lista de Hortas</h3>
         <div class="row">
             <?php foreach ($hortas as $horta): ?>
                 <?php
-                    // Para cada horta, busca os canteiros vinculados
-                    $canteiros = $canteiroController->getCanteirosByHorta($horta['idHorta']);
+                // Para cada horta, busca os canteiros vinculados
+                $canteiros = $canteiroController->getCanteirosByHorta($horta['idHorta']);
                 ?>
                 <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card h-100 card-hover">
@@ -136,7 +147,7 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
                                 </button>
                                 <!-- Botão para acessar a página de Análise de Dados (passa o idHorta) -->
                                 <a class="btn btn-primary btn-action w-100 mb-2"
-                                   href="AnaliseDados.php?idHorta=<?= htmlspecialchars($horta['idHorta'], ENT_QUOTES, 'UTF-8'); ?>">
+                                    href="AnaliseDados.php?idHorta=<?= htmlspecialchars($horta['idHorta'], ENT_QUOTES, 'UTF-8'); ?>">
                                     <i class="bi bi-bar-chart-line"></i> Análise Dados
                                 </a>
                             </div>
@@ -151,7 +162,7 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
                             <h3>Confirmar Exclusão</h3>
                         </div>
                         <div class="modal-body">
-                            <p>Tem certeza que deseja excluir a horta 
+                            <p>Tem certeza que deseja excluir a horta
                                 "<strong><?= htmlspecialchars($horta['nome_horta'], ENT_QUOTES, 'UTF-8'); ?></strong>"?
                             </p>
                         </div>
@@ -182,7 +193,8 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
                             </div>
                             <div class="mb-3">
                                 <label for="observacoes<?= $horta['idHorta']; ?>" class="form-label">Observações</label>
-                                <input type="text" id="observacoes<?= $horta['idHorta']; ?>" name="observacoes" class="form-control"
+                                <input type="text" id="observacoes<?= $horta['idHorta']; ?>" name="observacoes"
+                                    class="form-control"
                                     value="<?= htmlspecialchars($horta['observacoes'], ENT_QUOTES, 'UTF-8'); ?>">
                             </div>
                             <div class="modal-footer">
@@ -239,74 +251,130 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
                 </div>
 
                 <!-- Modal: Exibir Canteiros da Horta -->
-                <div id="modalCanteiros<?= $horta['idHorta']; ?>" class="modal">
+                <div id="modalCanteiros<?= $horta['idHorta']; ?>" class="modal min-modal">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h3>Canteiros da Horta "<?= htmlspecialchars($horta['nome_horta'], ENT_QUOTES, 'UTF-8'); ?>"</h3>
+                            <div class="header-content">
+                                <h3 class="modal-title"><?= htmlspecialchars($horta['nome_horta'], ENT_QUOTES, 'UTF-8'); ?>
+                                </h3>
+                                <p class="modal-subtitle">Canteiros cadastrados</p>
+                            </div>
+                            <button class="close-icon"
+                                onclick="document.getElementById('modalCanteiros<?= $horta['idHorta']; ?>').style.display='none'">
+                                &times;
+                            </button>
                         </div>
+
                         <div class="modal-body">
                             <?php if (empty($canteiros)): ?>
-                                <p>Nenhum canteiro cadastrado.</p>
+                                <div class="empty-state">
+                                    <div class="empty-icon">🌱</div>
+                                    <p>Nenhum canteiro encontrado</p>
+                                </div>
                             <?php else: ?>
-                                <?php foreach ($canteiros as $canteiro): ?>
-                                    <div class="card mb-2">
-                                        <div class="card-body">
-                                            <h6 class="card-subtitle mb-2 text-muted">
-                                                <?= htmlspecialchars($canteiro['Cultura'], ENT_QUOTES, 'UTF-8'); ?>
-                                            </h6>
-                                            <p class="card-text">
-                                                Plantio: <?= htmlspecialchars($canteiro['DataPlantio'], ENT_QUOTES, 'UTF-8'); ?><br>
-                                                Colheita: <?= htmlspecialchars($canteiro['DataColheira'], ENT_QUOTES, 'UTF-8'); ?>
-                                            </p>
-                                            <button class="btn btn-sm btn-primary"
-                                                onclick="document.getElementById('modalDispositivoCanteiro<?= $canteiro['idCanteiros']; ?>').style.display='block'">
-                                                <i class="bi bi-plus-lg"></i> Vincular Dispositivo
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <!-- Modal: Vincular Dispositivo ao Canteiro -->
-                                    <div id="modalDispositivoCanteiro<?= $canteiro['idCanteiros']; ?>" class="modal">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h3>Vincular Dispositivo</h3>
+                                <div class="canteiro-list">
+                                    <?php foreach ($canteiros as $canteiro): ?>
+                                        <?php
+                                        $dispList = $canteiroController->getDispositivosByCanteiro($canteiro['idCanteiros']);
+                                        $countDisp = count($dispList);
+                                        ?>
+
+                                        <div class="canteiro-item">
+                                            <div class="canteiro-header">
+                                                <h4 class="cultura-name">
+                                                    <?= htmlspecialchars($canteiro['Cultura'], ENT_QUOTES, 'UTF-8'); ?>
+                                                </h4>
+                                                <span class="device-count"><?= $countDisp ?> dispositivos</span>
                                             </div>
-                                            <div class="modal-body">
-                                                <form action="" method="POST">
-                                                    <input type="hidden" name="acao" value="vincular_dispositivo">
-                                                    <input type="hidden" name="idCanteiros" value="<?= $canteiro['idCanteiros']; ?>">
-                                                    <div class="mb-3">
-                                                        <label>Dispositivo</label>
-                                                        <select name="idDispositivo" class="form-control" required>
-                                                            <?php
-                                                            // Recupera todos os dispositivos vinculados ao usuário
-                                                            $dispositivos = $dispositivoController->getAllDispositivosid($usuarioId);
-                                                            ?>
-                                                            <?php foreach ($dispositivos as $dispositivo): ?>
-                                                                <option value="<?= $dispositivo['idDispositivo']; ?>">
-                                                                    <?= $dispositivo['idDispositivo']; ?>
-                                                                </option>
-                                                            <?php endforeach; ?>
-                                                        </select>
+
+                                            <div class="timeline">
+                                                <div class="date-group">
+                                                    <div class="date-item">
+                                                        <span class="date-label">Plantio</span>
+                                                        <?= htmlspecialchars($canteiro['DataPlantio'], ENT_QUOTES, 'UTF-8'); ?>
                                                     </div>
-                                                    <div class="modal-footer">
-                                                        <button type="submit" class="btn btn-success">Vincular</button>
-                                                        <button type="button" class="btn btn-secondary"
+                                                    <div class="date-item">
+                                                        <span class="date-label">Colheita</span>
+                                                        <?= htmlspecialchars($canteiro['DataColheira'], ENT_QUOTES, 'UTF-8'); ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="modalDispositivoCanteiro<?= $canteiro['idCanteiros']; ?>"
+                                                class="modal min-modal">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <div class="header-content">
+                                                            <h3 class="modal-title">Vincular Dispositivo</h3>
+                                                            <p class="modal-subtitle">
+                                                                <?= htmlspecialchars($canteiro['Cultura'], ENT_QUOTES, 'UTF-8'); ?>
+                                                            </p>
+                                                        </div>
+                                                        <button class="close-icon"
                                                             onclick="document.getElementById('modalDispositivoCanteiro<?= $canteiro['idCanteiros']; ?>').style.display='none'">
-                                                            Cancelar
+                                                            &times;
                                                         </button>
                                                     </div>
-                                                </form>
+                                                    <div class="modal-body">
+                                                        <form action="" method="POST">
+                                                            <input type="hidden" name="acao" value="vincular_dispositivo">
+                                                            <input type="hidden" name="idHorta" value="<?= $horta['idHorta']; ?>">
+                                                            <input type="hidden" name="idCanteiros"
+                                                                value="<?= $canteiro['idCanteiros']; ?>">
+
+                                                            <div class="form-group mb-3">
+                                                                <label for="selectDevice<?= $canteiro['idCanteiros']; ?>"
+                                                                    class="form-label">Dispositivo</label>
+                                                                <select id="selectDevice<?= $canteiro['idCanteiros']; ?>"
+                                                                    name="idDispositivo" class="form-select" required>
+                                                                    <?php $dispositivos = $dispositivoController->getAllDispositivosid($usuarioId); ?>
+                                                                    <?php foreach ($dispositivos as $dispositivo): ?>
+                                                                        <option value="<?= $dispositivo['idDispositivo']; ?>">
+                                                                            <?= htmlspecialchars($dispositivo['nome_dispositivo'], ENT_QUOTES, 'UTF-8'); ?>
+                                                                        </option>
+                                                                    <?php endforeach; ?>
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="d-flex justify-content-end">
+                                                                <button type="submit" class="btn btn-success me-2">Vincular</button>
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    onclick="document.getElementById('modalDispositivoCanteiro<?= $canteiro['idCanteiros']; ?>').style.display='none'">
+                                                                    Cancelar
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
                                             </div>
+                                            <?php if ($countDisp > 0): ?>
+                                                <div class="device-list">
+                                                    <?php foreach ($dispList as $disp): ?>
+                                                        <div class="device-item">
+                                                            <span class="device-name">
+                                                                <?= htmlspecialchars($disp['nome_dispositivo'] ?? $disp['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>
+                                                            </span>
+                                                            <form method="POST" class="inline-form">
+                                                                <input type="hidden" name="acao" value="desvincular_dispositivo">
+                                                                <input type="hidden" name="idDispositivo"
+                                                                    value="<?= $disp['idDispositivo']; ?>">
+                                                                <button type="submit" class="unlink-button" title="Desvincular">
+                                                                    ✕
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <button class="link-button"
+                                                onclick="document.getElementById('modalDispositivoCanteiro<?= $canteiro['idCanteiros']; ?>').style.display='block'">
+                                                + Adicionar dispositivo
+                                            </button>
                                         </div>
-                                    </div>
-                                <?php endforeach; ?>
+                                    <?php endforeach; ?>
+                                </div>
                             <?php endif; ?>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary"
-                                onclick="document.getElementById('modalCanteiros<?= $horta['idHorta']; ?>').style.display='none'">
-                                Fechar
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -351,7 +419,7 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
 
     <script>
         // Fecha os modais quando clicar fora
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             var modals = document.getElementsByClassName('modal');
             for (var i = 0; i < modals.length; i++) {
                 if (event.target == modals[i]) {
@@ -385,4 +453,5 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
 
     <?php include '../Assets/footer.php'; ?>
 </body>
+
 </html>

@@ -17,7 +17,7 @@ class CanteiroController
             $this->pdo->beginTransaction();
 
             foreach ($culturaArray as $index => $cultura) {
-                
+
                 $dataPlantio = $dataPlantioArray[$index] ?? null;
                 $dataColheita = $dataColheitaArray[$index] ?? null;
 
@@ -36,7 +36,7 @@ class CanteiroController
                     ])
                 ) {
                     $this->pdo->rollBack();
-                    
+
                     return false;
                 }
             }
@@ -126,11 +126,14 @@ class CanteiroController
     {
         try {
             $stmt = $this->pdo->prepare("
-                UPDATE Dispositivo 
-                SET canteiro_id = ?
-                WHERE idDispositivo = ?
-            ");
-            return $stmt->execute([$idCanteiro, $idDispositivo]);
+            UPDATE Dispositivo 
+            SET canteiro_id = :canteiro_id
+            WHERE idDispositivo = :idDispositivo
+        ");
+            return $stmt->execute([
+                ':canteiro_id' => $idCanteiro,
+                ':idDispositivo' => $idDispositivo
+            ]);
         } catch (PDOException $e) {
             error_log("Erro ao vincular dispositivo: " . $e->getMessage());
             return false;
@@ -142,11 +145,11 @@ class CanteiroController
     {
         try {
             $stmt = $this->pdo->prepare("
-                UPDATE Dispositivo 
-                SET idCanteiro = NULL 
-                WHERE idDispositivo = ?
-            ");
-            return $stmt->execute([$idDispositivo]);
+            UPDATE Dispositivo 
+            SET canteiro_id = NULL
+            WHERE idDispositivo = :idDispositivo
+        ");
+            return $stmt->execute([':idDispositivo' => $idDispositivo]);
         } catch (PDOException $e) {
             error_log("Erro ao desvincular dispositivo: " . $e->getMessage());
             return false;
@@ -158,10 +161,10 @@ class CanteiroController
     {
         try {
             $stmt = $this->pdo->prepare("
-                SELECT * FROM Dispositivo 
-                WHERE idCanteiro = ?
-            ");
-            $stmt->execute([$idCanteiro]);
+            SELECT * FROM Dispositivo 
+            WHERE canteiro_id = :canteiro_id
+        ");
+            $stmt->execute([':canteiro_id' => $idCanteiro]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Erro ao buscar dispositivos: " . $e->getMessage());
