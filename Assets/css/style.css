@@ -467,8 +467,30 @@ google-charts {
 .min-modal {
     font-family: 'Inter', system-ui, sans-serif;
     color: #2d3748;
-}
-
+  }
+  
+/* Labels e inputs */
+.modal-body .form-label {
+    display: block;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .modal-body .form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    color: #2d3748;
+  }
+  .modal-body .canteiro-group {
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    background: #f7fafc;
+  }
 .modal-header {
     padding: 1.5rem;
     border-bottom: 1px solid #e2e8f0;
@@ -584,13 +606,13 @@ google-charts {
     border-radius: 6px;
     color: #4299e1;
     cursor: pointer;
-    margin-top: 1rem;
     transition: all 0.2s;
 }
 
 .link-button:hover {
-    border-color: #4299e1;
-    background: #ebf8ff;
+  border-color: #4299e1;
+  background: #ebf8ff;
+  text-decoration: none;
 }
 
 .empty-state {
