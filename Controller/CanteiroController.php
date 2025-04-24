@@ -89,11 +89,11 @@ class CanteiroController
     {
         try {
             $stmt = $this->pdo->prepare("
-                UPDATE Canteiro SET
+                UPDATE canteiros SET
                     Cultura = ?,
                     DataPlantio = ?,
-                    DataColheita = ?
-                WHERE idCanteiro = ?
+                    DataColheira = ?
+                WHERE idCanteiros = ?
             ");
 
             return $stmt->execute([

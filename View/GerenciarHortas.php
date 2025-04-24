@@ -72,7 +72,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             exit;
         }
 
-    } elseif ($acao === 'vincular_dispositivo') {
+    } elseif($acao === 'editar_canteiro'){
+        $idCanteiro = $_POST['idCanteiros'] ?? '';
+        $cultura = $_POST['cultura'] ?? '';
+        $dataPlantio = $_POST['data_plantio'] ?? '';
+        $dataColheita = $_POST['data_colheita'] ?? '';
+    
+        if (empty($cultura) || empty($dataPlantio) || empty($dataColheita)) {
+            echo "<p style='color: red;'>Preencha todos os campos obrigatórios</p>";
+        } else {
+            if ($canteiroController->updateCanteiro(
+                $idCanteiro,
+                htmlspecialchars($cultura, ENT_QUOTES, 'UTF-8'),
+                htmlspecialchars($dataPlantio, ENT_QUOTES, 'UTF-8'),
+                htmlspecialchars($dataColheita, ENT_QUOTES, 'UTF-8')
+            )) {
+                header("Location: " . $_SERVER['REQUEST_URI']);
+                exit;
+            } else {
+                echo "<p style='color: red;'>Erro ao atualizar o canteiro.</p>";
+            }
+        }
+    }
+    
+    elseif ($acao === 'vincular_dispositivo') {
         // Vincula dispositivo ao canteiro
         $idCanteiro = $_POST['idCanteiros'] ?? '';
         $idDispositivo = $_POST['idDispositivo'] ?? '';
@@ -325,7 +348,6 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
                                                     </button>
                                                 </div>
                                             </div>
-
                                             <div class="timeline">
                                                 <div class="date-group">
                                                     <div class="date-item">
@@ -338,8 +360,7 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
                                                     </div>
                                                 </div>
                                             </div>
-
-
+                                            <!-- Modal: Vincular dispositivos a canteiros -->
                                             <div id="modalDispositivoCanteiro<?= $canteiro['idCanteiros']; ?>"
                                                 class="modal min-modal">
                                                 <div class="modal-content">
@@ -391,9 +412,7 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
                                                 <div class="device-list">
                                                     <span class="device-count"><?= $countDisp ?> dispositivos</span>
                                                     <?php foreach ($dispList as $disp): ?>
-
                                                         <div class="device-item">
-
                                                             <span class="device-name">
                                                                 <?= htmlspecialchars($disp['nome_dispositivo'] ?? $disp['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>
                                                             </span>
@@ -409,11 +428,68 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
                                                     <?php endforeach; ?>
                                                 </div>
                                             <?php endif; ?>
-
                                             <button class="link-button"
                                                 onclick="document.getElementById('modalDispositivoCanteiro<?= $canteiro['idCanteiros']; ?>').style.display='block'">
                                                 + Adicionar dispositivo
                                             </button>
+                                        </div>
+                                        <!-- Modal: Editar Canteiro -->
+                                        <div id="modalEditarCanteiro<?= $canteiro['idCanteiros']; ?>" class="modal min-modal">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <div class="header-content">
+                                                        <h3 class="modal-title">Editar Canteiro</h3>
+                                                        <p class="modal-subtitle">
+                                                            <?= htmlspecialchars($canteiro['Cultura'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                                    </div>
+                                                    <button class="close-icon"
+                                                        onclick="document.getElementById('modalEditarCanteiro<?= $canteiro['idCanteiros']; ?>').style.display='none'">
+                                                        &times;
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="" method="POST">
+                                                        <input type="hidden" name="acao" value="editar_canteiro">
+                                                        <input type="hidden" name="idCanteiros"
+                                                            value="<?= $canteiro['idCanteiros']; ?>">
+
+                                                        <div class="form-group mb-3">
+                                                            <label for="cultura<?= $canteiro['idCanteiros']; ?>"
+                                                                class="form-label">Cultura</label>
+                                                            <input type="text" id="cultura<?= $canteiro['idCanteiros']; ?>"
+                                                                name="cultura" class="form-control"
+                                                                value="<?= htmlspecialchars($canteiro['Cultura'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                                required>
+                                                        </div>
+
+                                                        <div class="form-group mb-3">
+                                                            <label for="plantio<?= $canteiro['idCanteiros']; ?>"
+                                                                class="form-label">Data de Plantio</label>
+                                                            <input type="date" id="plantio<?= $canteiro['idCanteiros']; ?>"
+                                                                name="data_plantio" class="form-control"
+                                                                value="<?= htmlspecialchars($canteiro['DataPlantio'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                                required>
+                                                        </div>
+
+                                                        <div class="form-group mb-3">
+                                                            <label for="colheita<?= $canteiro['idCanteiros']; ?>"
+                                                                class="form-label">Data de Colheita</label>
+                                                            <input type="date" id="colheita<?= $canteiro['idCanteiros']; ?>"
+                                                                name="data_colheita" class="form-control"
+                                                                value="<?= htmlspecialchars($canteiro['DataColheira'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                                required>
+                                                        </div>
+
+                                                        <div class="modal-footer">
+                                                            <button type="submit" class="btn btn-success">Salvar Alterações</button>
+                                                            <button type="button" class="btn btn-secondary"
+                                                                onclick="document.getElementById('modalEditarCanteiro<?= $canteiro['idCanteiros']; ?>').style.display='none'">
+                                                                Cancelar
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
