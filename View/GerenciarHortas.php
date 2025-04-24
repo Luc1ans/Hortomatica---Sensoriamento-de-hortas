@@ -63,6 +63,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 echo "<p style='color: red;'>Erro ao adicionar canteiro.</p>";
             }
         }
+    } elseif ($acao === 'excluir_canteiro') {
+        $idCanteiro = $_POST['idCanteiros'] ?? '';
+        if (!$canteiroController->deleteCanteiro($idCanteiro)) {
+            echo "<p class='text-danger'>Erro ao excluir o canteiro.</p>";
+        } else {
+            header("Location: " . $_SERVER['REQUEST_URI']);
+            exit;
+        }
+
     } elseif ($acao === 'vincular_dispositivo') {
         // Vincula dispositivo ao canteiro
         $idCanteiro = $_POST['idCanteiros'] ?? '';
@@ -141,7 +150,7 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
                                     <i class="bi bi-plus-circle"></i> Adicionar Canteiro
                                 </button>
                                 <!-- Botão para Exibir Canteiros -->
-                                <button class="btn btn-primary btn-action w-100 mb-2"
+                                <button class="btn btn-success btn-action w-100 mb-2"
                                     onclick="document.getElementById('modalCanteiros<?= $horta['idHorta']; ?>').style.display='block'">
                                     <i class="bi bi-eye"></i> Exibir Canteiros
                                 </button>
@@ -264,6 +273,7 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
                         </div>
                     </div>
                 </div>
+
                 <!-- Modal: Exibir Canteiros da Horta -->
                 <div id="modalCanteiros<?= $horta['idHorta']; ?>" class="modal min-modal">
                     <div class="modal-content">
@@ -298,7 +308,22 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
                                                 <h4 class="cultura-name">
                                                     <?= htmlspecialchars($canteiro['Cultura'], ENT_QUOTES, 'UTF-8'); ?>
                                                 </h4>
-                                                <span class="device-count"><?= $countDisp ?> dispositivos</span>
+                                                <div class="d-flex gap-2">
+                                                    <form method="POST"
+                                                        onsubmit="return confirm('Tem certeza que deseja excluir este canteiro? Todos os dispositivos serão desvinculados.');">
+                                                        <input type="hidden" name="acao" value="excluir_canteiro">
+                                                        <input type="hidden" name="idCanteiros"
+                                                            value="<?= $canteiro['idCanteiros']; ?>">
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                            title="Excluir canteiro">
+                                                            <i class="bi bi-trash-fill"></i>
+                                                        </button>
+                                                    </form>
+                                                    <button class="btn btn-outline-primary btn-sm" title="Editar canteiro"
+                                                        onclick="document.getElementById('modalEditarCanteiro<?= $canteiro['idCanteiros']; ?>').style.display='block'">
+                                                        <i class="bi bi-pencil-fill"></i>
+                                                    </button>
+                                                </div>
                                             </div>
 
                                             <div class="timeline">
@@ -313,6 +338,7 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
                                                     </div>
                                                 </div>
                                             </div>
+
 
                                             <div id="modalDispositivoCanteiro<?= $canteiro['idCanteiros']; ?>"
                                                 class="modal min-modal">
@@ -363,8 +389,11 @@ $hortas = $hortaController->getHortasByUsuario($usuarioId);
                                             </div>
                                             <?php if ($countDisp > 0): ?>
                                                 <div class="device-list">
+                                                    <span class="device-count"><?= $countDisp ?> dispositivos</span>
                                                     <?php foreach ($dispList as $disp): ?>
+
                                                         <div class="device-item">
+
                                                             <span class="device-name">
                                                                 <?= htmlspecialchars($disp['nome_dispositivo'] ?? $disp['idDispositivo'], ENT_QUOTES, 'UTF-8'); ?>
                                                             </span>

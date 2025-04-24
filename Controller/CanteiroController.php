@@ -72,9 +72,11 @@ class CanteiroController
         try {
             $stmt = $this->pdo->prepare("
                 SELECT * FROM Canteiro 
-                WHERE idCanteiro = ?
+                WHERE idCanteiro = :canteido_id
             ");
-            $stmt->execute([$idCanteiro]);
+            $stmt->execute([
+                'canteiro_id' => $idCanteiro
+            ]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Erro ao buscar canteiro: " . $e->getMessage());
@@ -110,12 +112,27 @@ class CanteiroController
     public function deleteCanteiro($idCanteiro)
     {
         try {
-            $stmt = $this->pdo->prepare("
-                DELETE FROM Canteiro 
-                WHERE idCanteiro = ?
-            ");
-            return $stmt->execute([$idCanteiro]);
+            $this->pdo->beginTransaction();
+
+            // 1) desvincula todos os dispositivos deste canteiro
+            $stmt1 = $this->pdo->prepare("
+            UPDATE Dispositivo
+               SET canteiro_id = NULL
+             WHERE canteiro_id = ?
+        ");
+            $stmt1->execute([$idCanteiro]);
+
+            // 2) apaga o canteiro na tabela plural canteiros e coluna idCanteiros
+            $stmt2 = $this->pdo->prepare("
+            DELETE FROM canteiros
+             WHERE idCanteiros = ?
+        ");
+            $stmt2->execute([$idCanteiro]);
+
+            $this->pdo->commit();
+            return true;
         } catch (PDOException $e) {
+            $this->pdo->rollBack();
             error_log("Erro ao excluir canteiro: " . $e->getMessage());
             return false;
         }
