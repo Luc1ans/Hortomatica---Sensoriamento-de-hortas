@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="../Assets/css/style.css">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/Assets/css/style.css">
     <title>Gerenciar Dispositivos</title>
-    <?php include '../Assets/navbar.php'; ?>
+    <?php include __DIR__ . '/../Assets/navbar.php'; ?>
 </head>
 
 <body>
@@ -59,7 +59,10 @@
                             <form action="" method="POST" class="d-inline">
                                 <input type="hidden" name="acao" value="excluir">
                                 <input type="hidden" name="idDispositivo" value="<?= $dispositivosID['idDispositivo']; ?>">
-                                <button type="submit" class="btn btn-danger">Excluir</button>
+                                <button class="btn-delete" data-remote data-acao="excluir"
+                                    data-id="<?= $dev['idDispositivo'] ?>">
+                                    Excluir
+                                </button>
                             </form>
                             <button type="button" class="btn btn-secondary"
                                 onclick="document.getElementById('modalExcluir<?= $dispositivosID['idDispositivo']; ?>').style.display='none'">
@@ -83,7 +86,7 @@
                     <h3>Adicionar Dispositivo</h3>
                 </div>
                 <div class="modal-body">
-                    <form action="" method="POST">
+                    <form data-remote action="index.php?page=gerenciar_dispositivos" method="POST">
                         <input type="hidden" name="acao" value="adicionar">
                         <div class="mb-3">
                             <label for="idDispositivo" class="form-label">Selecionar ID</label>
@@ -136,7 +139,7 @@
             }
         }
     </script>
-    <?php include '../Assets/footer.php'; ?>
+    <?php include __DIR__ . '/../Assets/footer.php'; ?>
 </body>
 
 </html>

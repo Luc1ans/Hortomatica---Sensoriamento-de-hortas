@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Obtém o email e a senha enviados pelo formulário
@@ -42,8 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="..\Assets\css\style.css">
-    <?php include '../Assets/navbar.php'; ?>
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/Assets/css/style.css">
+    <?php include __DIR__ . '/../Assets/navbar.php'; ?>
     <title>Login - Hortomática</title>
 </head>
 
@@ -60,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             ?>
 
-            <form action="login.php" method="POST"> <!-- Ação do próprio arquivo -->
+            <form action="<?= BASE_PATH ?>/index.php?page=login" method="POST">
                 <div class="mb-3">
                     <label for="email" class="form-label">E-mail</label>
                     <input type="email" class="form-control" id="email" name="email" placeholder="Digite seu e-mail"
@@ -79,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <?php include '../Assets/footer.php'; ?>
+    <?php include __DIR__ . '/../Assets/footer.php'; ?>
 </body>
 
 
