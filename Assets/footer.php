@@ -16,9 +16,9 @@
             <div class="footer-section">
                 <h5 class="footer-title">Apoio</h5>
                 <div class="apoio-logos">                  
-                    <img src="../Assets/image/fapes.png" alt="Instituição 2" class="apoio-logo">
-                    <img src="../Assets/image/ciclos_escrita.png" alt="Instituição 1" class="apoio-logo">
-                    <img src="../Assets/image/ifes.png" alt="Instituição 3" class="apoio-logo">
+                    <img src="<?= ASSETS ?>/image/fapes.png" alt="Instituição 2" class="apoio-logo">
+                    <img src="<?= ASSETS ?>/image/ciclos_escrita.png" alt="Instituição 1" class="apoio-logo">
+                    <img src="<?= ASSETS ?>/image/ifes.png" alt="Instituição 3" class="apoio-logo">
                 </div>
             </div>
 

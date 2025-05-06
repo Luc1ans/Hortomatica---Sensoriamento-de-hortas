@@ -89,11 +89,11 @@ class CanteiroController
     {
         try {
             $stmt = $this->pdo->prepare("
-                UPDATE Canteiro SET
+                UPDATE canteiros SET
                     Cultura = ?,
                     DataPlantio = ?,
-                    DataColheita = ?
-                WHERE idCanteiro = ?
+                    DataColheira = ?
+                WHERE idCanteiros = ?
             ");
 
             return $stmt->execute([
@@ -113,16 +113,12 @@ class CanteiroController
     {
         try {
             $this->pdo->beginTransaction();
-
-            // 1) desvincula todos os dispositivos deste canteiro
             $stmt1 = $this->pdo->prepare("
             UPDATE Dispositivo
                SET canteiro_id = NULL
              WHERE canteiro_id = ?
         ");
             $stmt1->execute([$idCanteiro]);
-
-            // 2) apaga o canteiro na tabela plural canteiros e coluna idCanteiros
             $stmt2 = $this->pdo->prepare("
             DELETE FROM canteiros
              WHERE idCanteiros = ?
