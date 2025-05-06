@@ -5,11 +5,12 @@ require_once __DIR__ . '/../Controller/Database.php';
 class Dispositivo
 {
     private $db;
-    
-    public function __construct($pdo) {
+
+    public function __construct($pdo)
+    {
         $this->db = $pdo;
     }
-    
+
     public function getDispositivoById($idDispositivo)
     {
         $sql = "SELECT * FROM dispositivo WHERE idDispositivo = :id";
@@ -70,7 +71,18 @@ class Dispositivo
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
+    
+    public function getAvailableDispositivos($userId)
+    {
+        $sql = "SELECT idDispositivo, nome_dispositivo, localizacao 
+            FROM dispositivo 
+            WHERE user_id = :user_id 
+              AND canteiro_id IS NULL";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     public function getDispositivoByCanteiro($idCanteiros)
     {

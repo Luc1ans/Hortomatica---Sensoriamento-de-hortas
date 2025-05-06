@@ -8,10 +8,11 @@ require_once __DIR__ . '/../Controller/CanteiroController.php';
 class HortaController {
     private $model;
     private $canteiroController;
+    private $dispositivoModel; 
 
     public function __construct($hortaModel, $canteiroModel, $dispositivoModel) {
         $this->model = $hortaModel;
-        // instanciamos o controller de canteiro para delegar ações
+        $this->dispositivoModel = $dispositivoModel; 
         $this->canteiroController = new CanteiroController(
             $canteiroModel,
             $dispositivoModel
@@ -49,7 +50,9 @@ class HortaController {
             }
         }
 
-        // Se for AJAX retornamos apenas hortas ou resultados de canteiros/dispositivos
+        // Busca dispositivos livres do usuário
+        $dispositivosLivres = $this->dispositivoModel->getAvailableDispositivos($userId);
+
         if (
             isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
             strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
@@ -58,18 +61,16 @@ class HortaController {
             echo json_encode([
                 'hortas' => $hortas,
                 'canteirosMap' => $canteirosMap,
-                'dispMap' => $dispMap
+                'dispMap' => $dispMap,
+                'dispositivosLivres' => $dispositivosLivres
             ]);
             exit;
         }
-
-        // Carregar view
         require __DIR__ . '/../View/gerenciarhortas.php';
     }
 
     private function processarPost($data, $userId) {
         $acao = $data['acao'] ?? '';
-
         switch ($acao) {
             case 'adicionar':
                 $this->model->createHorta(
@@ -104,12 +105,19 @@ class HortaController {
             case 'vincular_dispositivo':
             case 'desvincular_dispositivo':
                 $result = $this->canteiroController->processarAcao($acao, $data, $userId);
-                header('Content-Type: application/json');
-                echo json_encode(['success' => $result]);
+
+                if ($result) {
+                    $_SESSION['mensagem']      = 'Operação realizada com sucesso!';
+                    $_SESSION['tipo_mensagem'] = 'success';
+                } else {
+                    $_SESSION['mensagem']      = 'Falha ao executar operação.';
+                    $_SESSION['tipo_mensagem'] = 'danger';
+                }
+                header('Location: ' . $_SERVER['REQUEST_URI']);
                 exit;
 
             default:
-                // ação desconhecida
+                
                 break;
         }
     }

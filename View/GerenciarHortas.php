@@ -12,7 +12,28 @@
 </head>
 
 <body>
-
+    <?php if (!empty($_SESSION['mensagem'])): ?>
+        <div class="position-fixed top-50 start-50 translate-middle" style="z-index:2000; min-width:300px;">
+            <div class="toast show align-items-center text-bg-<?= $_SESSION['tipo_mensagem'] ?> border-0" role="alert"
+                aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body text-center w-100">
+                        <?= $_SESSION['mensagem']; ?>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        </div>
+        <script>
+            setTimeout(() => {
+                document.querySelector('.toast').classList.remove('show');
+            }, 2000);
+        </script>
+        <?php
+        // limpa flash
+        unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']);
+        ?>
+    <?php endif; ?>
     <div class="container mt-4">
         <h3 class="mb-4">Lista de Hortas</h3>
         <div class="row">
@@ -103,12 +124,11 @@
                                 <h3 class="modal-title">Adicionar Canteiro</h3>
                                 <p class="modal-subtitle">Preencha os dados do canteiro</p>
                             </div>
-                            <button class="close-icon" onclick="toggleModal('modalAdicionarCanteiro<?= $idH ?>')">
-                                &times;
-                            </button>
+                            <button class="close-icon"
+                                onclick="toggleModal('modalAdicionarCanteiro<?= $idH ?>')">&times;</button>
                         </div>
                         <div class="modal-body">
-                            <form action="" method="POST">
+                            <form method="POST">
                                 <input type="hidden" name="acao" value="adicionar_canteiro">
                                 <input type="hidden" name="idHorta" value="<?= $idH ?>">
 
@@ -136,9 +156,7 @@
                                 <div class="modal-footer">
                                     <button type="submit" class="btn btn-success">Salvar</button>
                                     <button type="button" class="btn btn-secondary"
-                                        onclick="toggleModal('modalAdicionarCanteiro<?= $idH ?>')">
-                                        Cancelar
-                                    </button>
+                                        onclick="toggleModal('modalAdicionarCanteiro<?= $idH ?>')">Cancelar</button>
                                 </div>
                             </form>
                         </div>
@@ -150,19 +168,14 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <div class="header-content">
-                                <h3 class="modal-title"><?= htmlspecialchars($horta['nome_horta'], ENT_QUOTES, 'UTF-8') ?>
-                                </h3>
+                                <h3 class="modal-title"><?= htmlspecialchars($horta['nome_horta'], ENT_QUOTES) ?></h3>
                                 <p class="modal-subtitle">Canteiros cadastrados</p>
                             </div>
-                            <button class="close-icon" onclick="toggleModal('modalCanteiros<?= $idH ?>')">
-                                &times;
-                            </button>
+                            <button class="close-icon" onclick="toggleModal('modalCanteiros<?= $idH ?>')">&times;</button>
                         </div>
 
                         <div class="modal-body">
-                            <?php
-                            $canteiros = $canteirosMap[$idH] ?? [];
-                            if (empty($canteiros)): ?>
+                            <?php if (empty($canteiros)): ?>
                                 <div class="empty-state">
                                     <div class="empty-icon">🌱</div>
                                     <p>Nenhum canteiro encontrado</p>
@@ -176,18 +189,15 @@
                                         ?>
                                         <div class="canteiro-item">
                                             <div class="canteiro-header">
-                                                <h4 class="cultura-name">
-                                                    <?= htmlspecialchars($canteiro['Cultura'], ENT_QUOTES, 'UTF-8') ?>
+                                                <h4 class="cultura-name"><?= htmlspecialchars($canteiro['Cultura'], ENT_QUOTES) ?>
                                                 </h4>
                                                 <div class="d-flex gap-2">
                                                     <form method="POST"
                                                         onsubmit="return confirm('Tem certeza que deseja excluir este canteiro? Todos os dispositivos serão desvinculados.');">
                                                         <input type="hidden" name="acao" value="excluir_canteiro">
                                                         <input type="hidden" name="idCanteiros" value="<?= $idC ?>">
-                                                        <button type="submit" class="btn btn-outline-danger btn-sm"
-                                                            title="Excluir canteiro">
-                                                            <i class="bi bi-trash-fill"></i>
-                                                        </button>
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm"><i
+                                                                class="bi bi-trash-fill"></i></button>
                                                     </form>
                                                     <button class="btn btn-outline-primary btn-sm" title="Editar canteiro"
                                                         onclick="toggleModal('modalEditarCanteiro<?= $idC ?>')">
@@ -198,14 +208,43 @@
 
                                             <div class="timeline">
                                                 <div class="date-group">
-                                                    <div class="date-item">
-                                                        <span class="date-label">Plantio</span>
-                                                        <?= htmlspecialchars($canteiro['DataPlantio'], ENT_QUOTES, 'UTF-8') ?>
-                                                    </div>
-                                                    <div class="date-item">
-                                                        <span class="date-label">Colheita</span>
-                                                        <?= htmlspecialchars($canteiro['DataColheira'], ENT_QUOTES, 'UTF-8') ?>
-                                                    </div>
+                                                    <div class="date-item"><span class="date-label">Plantio</span>
+                                                        <?= htmlspecialchars($canteiro['DataPlantio'], ENT_QUOTES) ?></div>
+                                                    <div class="date-item"><span class="date-label">Colheita</span>
+                                                        <?= htmlspecialchars($canteiro['DataColheira'], ENT_QUOTES) ?></div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Modal Editar Canteiro -->
+                                            <div id="modalEditarCanteiro<?= $idC ?>" class="modal">
+                                                <div class="modal-content">
+                                                    <form method="POST">
+                                                        <input type="hidden" name="acao" value="editar_canteiro">
+                                                        <input type="hidden" name="idCanteiro" value="<?= $idC ?>">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Cultura</label>
+                                                            <input type="text" name="cultura" class="form-control"
+                                                                value="<?= htmlspecialchars($canteiro['Cultura'], ENT_QUOTES) ?>"
+                                                                required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Data de plantio</label>
+                                                            <input type="date" name="data_plantio" class="form-control"
+                                                                value="<?= htmlspecialchars($canteiro['DataPlantio'], ENT_QUOTES) ?>"
+                                                                required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Data de colheita prevista</label>
+                                                            <input type="date" name="data_colheita" class="form-control"
+                                                                value="<?= htmlspecialchars($canteiro['DataColheira'], ENT_QUOTES) ?>"
+                                                                required>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button class="btn btn-success">Salvar</button>
+                                                            <button type="button" class="btn btn-secondary"
+                                                                onclick="toggleModal('modalEditarCanteiro<?= $idC ?>')">Cancelar</button>
+                                                        </div>
+                                                    </form>
                                                 </div>
                                             </div>
 
@@ -216,36 +255,32 @@
                                                         <div class="header-content">
                                                             <h3 class="modal-title">Vincular Dispositivo</h3>
                                                             <p class="modal-subtitle">
-                                                                <?= htmlspecialchars($canteiro['Cultura'], ENT_QUOTES, 'UTF-8') ?>
+                                                                <?= htmlspecialchars($canteiro['Cultura'], ENT_QUOTES) ?>
                                                             </p>
                                                         </div>
                                                         <button class="close-icon"
-                                                            onclick="toggleModal('modalDispositivoCanteiro<?= $idC ?>')">
-                                                            &times;
-                                                        </button>
+                                                            onclick="toggleModal('modalDispositivoCanteiro<?= $idC ?>')">&times;</button>
                                                     </div>
                                                     <div class="modal-body">
                                                         <form method="POST">
                                                             <input type="hidden" name="acao" value="vincular_dispositivo">
                                                             <input type="hidden" name="idCanteiros" value="<?= $idC ?>">
-
                                                             <div class="form-group mb-3">
                                                                 <label class="form-label">Dispositivo</label>
                                                                 <select name="idDispositivo" class="form-select" required>
+                                                                    <option value="" disabled selected>Selecione um dispositivo
+                                                                    </option>
                                                                     <?php foreach ($dispositivosLivres as $dispositivo): ?>
                                                                         <option value="<?= $dispositivo['idDispositivo'] ?>">
-                                                                            <?= htmlspecialchars($dispositivo['nome_dispositivo'], ENT_QUOTES, 'UTF-8') ?>
+                                                                            <?= htmlspecialchars($dispositivo['nome_dispositivo'], ENT_QUOTES) ?>
                                                                         </option>
                                                                     <?php endforeach; ?>
                                                                 </select>
                                                             </div>
-
                                                             <div class="d-flex justify-content-end">
                                                                 <button type="submit" class="btn btn-success me-2">Vincular</button>
                                                                 <button type="button" class="btn btn-secondary"
-                                                                    onclick="toggleModal('modalDispositivoCanteiro<?= $idC ?>')">
-                                                                    Cancelar
-                                                                </button>
+                                                                    onclick="toggleModal('modalDispositivoCanteiro<?= $idC ?>')">Cancelar</button>
                                                             </div>
                                                         </form>
                                                     </div>
@@ -257,16 +292,13 @@
                                                     <span class="device-count"><?= $countDisp ?> dispositivos</span>
                                                     <?php foreach ($disps as $disp): ?>
                                                         <div class="device-item">
-                                                            <span class="device-name">
-                                                                <?= htmlspecialchars($disp['nome_dispositivo'], ENT_QUOTES, 'UTF-8') ?>
-                                                            </span>
+                                                            <span
+                                                                class="device-name"><?= htmlspecialchars($disp['nome_dispositivo'], ENT_QUOTES) ?></span>
                                                             <form method="POST" class="inline-form">
                                                                 <input type="hidden" name="acao" value="desvincular_dispositivo">
                                                                 <input type="hidden" name="idDispositivo"
                                                                     value="<?= $disp['idDispositivo'] ?>">
-                                                                <button type="submit" class="unlink-button" title="Desvincular">
-                                                                    ✕
-                                                                </button>
+                                                                <button type="submit" class="unlink-button" title="Desvincular">✕</button>
                                                             </form>
                                                         </div>
                                                     <?php endforeach; ?>
@@ -274,9 +306,8 @@
                                             <?php endif; ?>
 
                                             <button class="link-button"
-                                                onclick="toggleModal('modalDispositivoCanteiro<?= $idC ?>')">
-                                                + Adicionar dispositivo
-                                            </button>
+                                                onclick="toggleModal('modalDispositivoCanteiro<?= $idC ?>')">+ Adicionar
+                                                dispositivo</button>
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -292,7 +323,7 @@
             <?php endforeach; ?>
         </div> <!-- Fecha div.row -->
 
-        <!-- Botão Adicionar Horta - Fora da .row -->
+        <!-- Botão Adicionar Horta -->
         <div class="text-center mt-4">
             <button class="btn btn-primary btn-lg mb-5" onclick="toggleModal('modalAdicionarHorta')">
                 <i class="bi bi-plus-lg"></i> Adicionar Horta
@@ -301,7 +332,7 @@
 
     </div> <!-- Fecha div.container -->
 
-    <!-- Modal Adicionar Horta - Fora do container principal -->
+    <!-- Modal Adicionar Horta -->
     <div id="modalAdicionarHorta" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -340,19 +371,19 @@
             const novoGrupo = document.createElement('div');
             novoGrupo.className = 'canteiro-group mb-3';
             novoGrupo.innerHTML = `
-                <div class="mb-3">
-                    <label>Cultura</label>
-                    <input type="text" name="cultura[]" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label>Data de plantio</label>
-                    <input type="date" name="data_plantio[]" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label>Data de colheita prevista</label>
-                    <input type="date" name="data_colheita[]" class="form-control" required>
-                </div>
-            `;
+            <div class="mb-3">
+                <label>Cultura</label>
+                <input type="text" name="cultura[]" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label>Data de plantio</label>
+                <input type="date" name="data_plantio[]" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label>Data de colheita prevista</label>
+                <input type="date" name="data_colheita[]" class="form-control" required>
+            </div>
+        `;
             container.appendChild(novoGrupo);
         }
     </script>

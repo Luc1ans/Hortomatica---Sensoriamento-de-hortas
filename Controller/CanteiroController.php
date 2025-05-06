@@ -18,18 +18,36 @@ class CanteiroController
         switch ($acao) {
             case 'adicionar_canteiro':
                 return $this->adicionarCanteiro($dados, $usuarioId);
+
             case 'editar_canteiro':
-                return $this->canteiroModel->updateCanteiro($dados);
+                // Extrai os campos individuais em vez de passar o array todo
+                return $this->canteiroModel->updateCanteiro(
+                    $dados['idCanteiro'],            
+                    $dados['cultura'],
+                    $dados['data_plantio'],
+                    $dados['data_colheita']
+                );
+
             case 'excluir_canteiro':
-                return $this->canteiroModel->deleteCanteiro($dados);
+                // Garante que passamos somente o ID (string ou int), não o array
+                $id = isset($dados['idCanteiros']) ? $dados['idCanteiros'] : $dados['idCanteiro'];
+                return $this->canteiroModel->deleteCanteiro($id);
+
             case 'vincular_dispositivo':
-                return $this->canteiroModel->linkDispositivo($dados);
+                return $this->canteiroModel->linkDispositivo(
+                    $dados['idCanteiros'],
+                    $dados['idDispositivo']
+                );
+
             case 'desvincular_dispositivo':
-                return $this->canteiroModel->unlinkDispositivo($dados);
+                return $this->canteiroModel->unlinkDispositivo($dados['idDispositivo']);
+
             case 'getCanteirosByHorta':
                 return $this->canteiroModel->getCanteirosByHorta($dados['idHorta']);
+
             case 'getDispositivosByCanteiro':
                 return $this->canteiroModel->getDispositivosByCanteiro($dados['idCanteiro']);
+
             default:
                 return false;
         }
@@ -37,7 +55,6 @@ class CanteiroController
 
     private function adicionarCanteiro($dados, $usuarioId)
     {
-        // Validação dos dados
         if (
             empty($dados['idHorta']) ||
             empty($dados['cultura']) ||
@@ -55,5 +72,4 @@ class CanteiroController
             $usuarioId
         );
     }
-
 }
