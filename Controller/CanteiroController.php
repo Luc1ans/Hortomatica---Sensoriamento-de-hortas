@@ -1,4 +1,6 @@
 <?php
+namespace Controller;
+
 require_once __DIR__ . '/../Model/Canteiro.php';
 require_once __DIR__ . '/../Model/Dispositivo.php';
 
@@ -61,7 +63,7 @@ class CanteiroController
             empty($dados['data_plantio']) ||
             empty($dados['data_colheita'])
         ) {
-            throw new Exception('Todos os campos são obrigatórios');
+           
         }
 
         return $this->canteiroModel->createCanteiro(

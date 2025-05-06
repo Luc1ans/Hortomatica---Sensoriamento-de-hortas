@@ -1,4 +1,8 @@
 <?php
+namespace Model;
+
+use PDO;
+
 require_once __DIR__ . '/../Controller/Database.php';
 
 

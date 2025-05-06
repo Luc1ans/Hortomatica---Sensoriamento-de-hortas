@@ -1,4 +1,8 @@
 <?php
+namespace Controller;
+
+use PDO;
+use PDOException;
 class Database {
     private static $host = 'localhost';
     private static $db_name = 'dbhortomatica';

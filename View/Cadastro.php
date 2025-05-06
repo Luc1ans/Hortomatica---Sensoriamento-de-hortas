@@ -1,6 +1,9 @@
 <?php
 session_start();
 
+require __DIR__ . '/vendor/autoload.php';
+
+use Controller\Database;
 // Verifica se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Obtém os dados enviados pelo formulário

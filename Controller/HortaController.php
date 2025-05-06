@@ -1,5 +1,6 @@
 <?php
 // Controller/HortaController.php
+namespace Controller;
 require_once __DIR__ . '/../Model/Horta.php';
 require_once __DIR__ . '/../Model/Canteiro.php';
 require_once __DIR__ . '/../Model/Dispositivo.php';
@@ -92,7 +93,6 @@ class HortaController {
                 $this->model->deleteHorta((int)$data['idHorta']);
                 break;
 
-            // Ações relacionadas a canteiros dentro da horta
             case 'listar_canteiros':
                 $canteiros = $this->canteiroController->processarAcao('getCanteirosByHorta', ['idHorta' => $data['idHorta']], $userId);
                 header('Content-Type: application/json');

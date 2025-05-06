@@ -1,4 +1,5 @@
 <?php
+namespace Controller;
 require_once __DIR__ . '/../Model/Dispositivo.php';
 
 class DispositivoController {
