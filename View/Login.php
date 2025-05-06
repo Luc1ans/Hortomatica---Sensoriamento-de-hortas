@@ -1,5 +1,6 @@
 <?php
 
+use Controller\Database;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Obtém o email e a senha enviados pelo formulário
     $email = $_POST['email'] ?? '';

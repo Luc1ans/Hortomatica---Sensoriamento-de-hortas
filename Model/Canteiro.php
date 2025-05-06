@@ -1,5 +1,7 @@
 <?php
-
+namespace Model;
+use PDO;
+use PDOException;
 class Canteiro
 {
     private $pdo;

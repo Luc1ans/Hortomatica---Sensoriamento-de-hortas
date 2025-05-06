@@ -30,10 +30,10 @@
             }, 2000);
         </script>
         <?php
-        // limpa flash
         unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']);
         ?>
     <?php endif; ?>
+
     <div class="container mt-4">
         <h3 class="mb-4">Lista de Hortas</h3>
         <div class="row">
@@ -62,6 +62,10 @@
                             </button>
                             <button class="btn btn-success w-100 mb-2" onclick="toggleModal('modalCanteiros<?= $idH ?>')">
                                 <i class="bi bi-eye"></i> Ver Canteiros
+                            </button>
+                            <button class="btn btn-info w-100 mb-2"
+                                onclick="window.location.href='<?= BASE_PATH ?>/index.php?page=analise&idHorta=<?= $idH ?>'">
+                                <i class="bi bi-bar-chart-line"></i> Análise de dados
                             </button>
                         </div>
                     </div>
@@ -390,5 +394,4 @@
 
     <?php include __DIR__ . '/../Assets/footer.php'; ?>
 </body>
-
 </html>

@@ -1,58 +1,65 @@
 <?php
-require_once '../vendor/autoload.php'; 
-require_once __DIR__ . '/../Controller/Database.php';
-require_once('../Controller/DispositivoController.php');
-require_once('../Controller/LeituraSensores.php');
+// iniciar sessão para manter BASE_PATH, caso use redirecionamento
+session_start();
 
-if (!isset($_POST['idHorta'])) {
-    die("Erro: ID da horta não foi fornecido.");
+// 1) Autoload e imports
+require __DIR__ . '/../vendor/autoload.php';
+
+use Controller\Database;
+use Model\Leitura;
+
+// 2) Recebe parâmetros do form
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['idHorta'])) {
+    header('Location: index.php');
+    exit;
 }
 
-$idHorta = $_POST['idHorta'];
-$dispositivosSelecionados = isset($_POST['dispositivos']) ? explode(',', $_POST['dispositivos']) : [];
-$filtroSensor = $_POST['sensor'] ?? '';
-$filtroDataInicial = $_POST['data_inicial'] ?? '';
-$filtroDataFinal = $_POST['data_final'] ?? '';
+$idHorta = (int) $_POST['idHorta'];
+$selDevices   = isset($_POST['dispositivos']) 
+    ? explode(',', (string)$_POST['dispositivos']) 
+    : [];
+$filtroSensor     = $_POST['sensor']        ?? '';
+$filtroDataInicial= $_POST['data_inicial']  ?? '';
+$filtroDataFinal  = $_POST['data_final']    ?? '';
 
-
-// Conecta ao banco e busca os dados
+// 3) Conecta e busca leituras
 $pdo = Database::connect();
-$controller = new DispositivoController($pdo);
-$leituraController = new LeituraSensores();
+$leituraModel = new Leitura($pdo);
 
+$leituras       = [];
+$ultimasLeituras= [];
+foreach ($selDevices as $idDisp) {
+    $id = (int)$idDisp;
+    $leituras       = array_merge(
+        $leituras,
+        $leituraModel->getByDispositivo($id, $filtroSensor, $filtroDataInicial, $filtroDataFinal)
+    );
+    $ultimasLeituras= array_merge(
+        $ultimasLeituras,
+        $leituraModel->getLatestByDispositivo($id)
+    );
+}
+
+// 4) Coleta imagens de gráfico do POST
 $chartImages = [];
-foreach ($_POST as $key => $value) {
-    if (strpos($key, 'img_') === 0) {
-        $sensorName = str_replace("img_", "", $key);
-        $chartImages[$sensorName] = $value;
+foreach ($_POST as $k => $v) {
+    if (str_starts_with($k, 'img_') && is_string($v)) {
+        $chartImages[$k] = $v;
     }
 }
 
-// Obtém leituras filtradas (replicar lógica da página de análise)
-$leituras = [];
-$ultimasLeituras = [];
-
-foreach ($dispositivosSelecionados as $idDisp) {
-    $leiturasDevice = $leituraController->getLeiturasByDispositivo($idDisp, $filtroSensor, $filtroDataInicial, $filtroDataFinal);
-    $ultimasDevice = $leituraController->getUltimasLeituras($idDisp);
-    $leituras = array_merge($leituras, $leiturasDevice);
-    $ultimasLeituras = array_merge($ultimasLeituras, $ultimasDevice);
-}
-
-// Configura DomPDF
+// 5) Renderiza PDF
 $options = new Dompdf\Options();
 $options->set('isRemoteEnabled', true);
 $dompdf = new Dompdf\Dompdf($options);
 
-// Renderiza o template com os dados
+// caminho absoluto para o template
 ob_start();
-include 'template_pdf.php'; // Certifique-se de que o caminho está correto
+require __DIR__ . '/../View/pdf/template_pdf.php';
 $html = ob_get_clean();
 
 $dompdf->loadHtml($html);
 $dompdf->setPaper('A4', 'landscape');
 $dompdf->render();
-
-// Saída do PDF
-$dompdf->stream("relatorio.pdf", ["Attachment" => false]);
-?>
+$dompdf->stream("relatorio_horta_{$idHorta}.pdf", ["Attachment" => false]);
+exit;

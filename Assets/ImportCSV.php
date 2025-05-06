@@ -1,107 +1,107 @@
 <?php
-require_once '../Controller/Database.php'; 
+require __DIR__ . '/../vendor/autoload.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_FILES['csvFile']) || $_FILES['csvFile']['error'] !== UPLOAD_ERR_OK) {
-        die("Erro ao enviar o arquivo CSV.");
-    }
+use Controller\Database;
 
-    $csvFile = $_FILES['csvFile']['tmp_name'];
-    $handle = fopen($csvFile, "r");
-    if (!$handle) {
-        die("Não foi possível abrir o arquivo.");
-    }
-
-    $header = fgets($handle);
-
-    $deviceLine = fgets($handle);
-    $deviceParts = explode(":", $deviceLine);
-    if (count($deviceParts) < 2) {
-        die("ID do dispositivo não encontrado no arquivo CSV.");
-    }
-    $idDispositivo = trim($deviceParts[1]);
-
-    $idHorta = $_POST['idHorta'] ?? $_GET['idHorta'] ?? null;
-
-    $pdo = Database::connect();
-
-    $query = "
-        SELECT CONCAT(data_leitura, ' ', hora_leitura) AS ultima_leitura 
-        FROM LeituraSensores 
-        WHERE Dispositivo_idDispositivo = :idDispositivo
-        ORDER BY CONCAT(data_leitura, ' ', hora_leitura) DESC 
-        LIMIT 1
-    ";
-    $stmtLast = $pdo->prepare($query);
-    $stmtLast->execute([':idDispositivo' => $idDispositivo]);
-    $row = $stmtLast->fetch(PDO::FETCH_ASSOC);
-    if ($row && !empty($row['ultima_leitura'])) {
-        $ultimaLeitura = new DateTime($row['ultima_leitura']);
-    } else {
-        $ultimaLeitura = null;
-    }
-
-    $stmt = $pdo->prepare("
-        INSERT INTO LeituraSensores 
-            (data_leitura, hora_leitura, nome_sensor, valor_leitura, Dispositivo_idDispositivo, fonte)
-        VALUES 
-            (:data_leitura, :hora_leitura, :nome_sensor, :valor_leitura, :Dispositivo_idDispositivo, 'CSV')
-    ");
-
-    while (($line = fgets($handle)) !== false) {
-        $line = trim($line);
-        if (empty($line)) {
-            continue;
-        }
-
-        $linhaPartes = explode(',', $line);
-        if (count($linhaPartes) < 2) {
-            continue;
-        }
-
-        $dataLeitura = trim($linhaPartes[0]);
-        $restante = trim($linhaPartes[1]);
-        if (strpos($restante, 'hora:') !== false) {
-            list(, $resto) = explode('hora:', $restante, 2);
-            $subPartes = explode(' ', trim($resto), 2);
-            $horaLeitura = $subPartes[0];
-            $infoSensor = isset($subPartes[1]) ? trim($subPartes[1]) : '';
-        } else {
-            continue;
-        }
-
-        $dataHoraCSV = new DateTime(date("Y-m-d H:i:s", strtotime($dataLeitura . ' ' . $horaLeitura)));
-        if ($ultimaLeitura !== null && $dataHoraCSV <= $ultimaLeitura) {
-            continue;
-        }
-
-        $sensores = explode(',', $infoSensor);
-        foreach ($sensores as $sensorInfo) {
-            $parts = explode(':', $sensorInfo, 2);
-            if (count($parts) < 2) {
-                continue;
-            }
-            $nomeSensor = trim($parts[0]);
-            $valorSensor = trim($parts[1]);
-            $valorFormatado = str_replace(['%', 'C'], '', $valorSensor);
-            if (is_numeric($valorFormatado)) {
-                $valorFormatado = (float) $valorFormatado;
-            }
-
-            // Insere a leitura no banco
-            $stmt->execute([
-                ':data_leitura'              => date("Y-m-d", strtotime($dataLeitura)),
-                ':hora_leitura'              => date("H:i:s", strtotime($horaLeitura)),
-                ':nome_sensor'               => $nomeSensor,
-                ':valor_leitura'             => $valorFormatado,
-                ':Dispositivo_idDispositivo' => $idDispositivo
-            ]);
-        }
-    }
-
-    fclose($handle);
-
-    header("Location: ../View/AnaliseDados.php?idHorta=$idHorta&imported=1&dispositivos[]=1");
-    exit();
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: ' . BASE_PATH . '/index.php');
+    exit;
 }
-?>
+
+if (empty($_FILES['csvFile']) || $_FILES['csvFile']['error'] !== UPLOAD_ERR_OK) {
+    die("Erro ao enviar o arquivo CSV.");
+}
+
+$handle = fopen($_FILES['csvFile']['tmp_name'], 'r');
+if (!$handle) {
+    die("Não foi possível abrir o arquivo.");
+}
+
+// Pula header
+fgets($handle);
+
+// Lê a linha do dispositivo
+$deviceLine = fgets($handle);
+$parts = explode(':', $deviceLine, 2);
+if (count($parts) < 2) {
+    die("ID do dispositivo não encontrado no CSV.");
+}
+$idDispositivo = trim($parts[1]);
+
+$idHorta = $_POST['idHorta'] ?? null;
+if (!$idHorta) {
+    die("ID da horta não fornecido.");
+}
+
+$pdo = Database::connect();
+
+// Recupera última leitura
+$stmtLast = $pdo->prepare("
+    SELECT CONCAT(data_leitura,' ',hora_leitura) AS ultima_leitura
+      FROM LeituraSensores
+     WHERE Dispositivo_idDispositivo = :id
+     ORDER BY data_leitura DESC, hora_leitura DESC
+     LIMIT 1
+");
+$stmtLast->execute([':id' => $idDispositivo]);
+$row = $stmtLast->fetch(PDO::FETCH_ASSOC);
+$ultimaLeitura = $row
+    ? new DateTime($row['ultima_leitura'])
+    : null;
+
+// Prepara insert
+$stmt = $pdo->prepare("
+    INSERT INTO LeituraSensores
+      (data_leitura, hora_leitura, nome_sensor, valor_leitura, Dispositivo_idDispositivo, fonte)
+    VALUES
+      (:data_leitura, :hora_leitura, :nome_sensor, :valor_leitura, :disp, 'CSV')
+");
+
+// Loop seguro até EOF
+while (($raw = fgets($handle)) !== false) {
+    $line = trim($raw);
+    if ($line === '') {
+        continue;
+    }
+
+    $cols = explode(',', $line, 2);
+    if (count($cols) < 2) {
+        continue;
+    }
+    [$dataLeitura, $rest] = $cols;
+    if (strpos($rest, 'hora:') === false) {
+        continue;
+    }
+    [, $afterHora] = explode('hora:', $rest, 2);
+    $parts = explode(' ', trim($afterHora), 2);
+    $horaLeitura = $parts[0];
+    $infoSensor = $parts[1] ?? '';
+
+    $tsCsv = new DateTime("$dataLeitura $horaLeitura");
+    if ($ultimaLeitura && $tsCsv <= $ultimaLeitura) {
+        continue;
+    }
+
+    foreach (explode(',', $infoSensor) as $sensorInfo) {
+        $sensorParts = explode(':', $sensorInfo, 2) + [1 => ''];
+        $nomeSensor = trim($sensorParts[0]);
+        $valorSensor = trim($sensorParts[1]);
+        $valorFormatado = floatval(str_replace(['%', 'C'], '', $valorSensor));
+
+        $stmt->execute([
+            ':data_leitura' => $tsCsv->format('Y-m-d'),
+            ':hora_leitura' => $tsCsv->format('H:i:s'),
+            ':nome_sensor' => $nomeSensor,
+            ':valor_leitura' => $valorFormatado,
+            ':disp' => $idDispositivo,
+        ]);
+    }
+}
+
+fclose($handle);
+
+// Redireciona de volta para análise, mantendo page=analise
+header(
+    "Location: ../index.php?page=analise&idHorta={$idHorta}&imported=1&dispositivos[]={$idDispositivo}"
+);
+exit;
