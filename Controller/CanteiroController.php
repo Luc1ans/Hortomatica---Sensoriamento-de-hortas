@@ -1,187 +1,75 @@
 <?php
-require_once __DIR__ . '/../Controller/Database.php';
+require_once __DIR__ . '/../Model/Canteiro.php';
+require_once __DIR__ . '/../Model/Dispositivo.php';
 
 class CanteiroController
 {
-    private $pdo;
+    private $canteiroModel;
+    private $dispositivoModel;
 
-    public function __construct(PDO $pdo)
+    public function __construct($canteiroModel, $dispositivoModel)
     {
-        $this->pdo = $pdo;
+        $this->canteiroModel = $canteiroModel;
+        $this->dispositivoModel = $dispositivoModel;
     }
 
-    // Cria um novo canteiro vinculado a uma horta
-    public function createCanteiro($idHorta, $culturaArray, $dataPlantioArray, $dataColheitaArray)
+    public function processarAcao($acao, $dados, $usuarioId)
     {
-        try {
-            $this->pdo->beginTransaction();
+        switch ($acao) {
+            case 'adicionar_canteiro':
+                return $this->adicionarCanteiro($dados, $usuarioId);
 
-            foreach ($culturaArray as $index => $cultura) {
+            case 'editar_canteiro':
+                // Extrai os campos individuais em vez de passar o array todo
+                return $this->canteiroModel->updateCanteiro(
+                    $dados['idCanteiro'],            
+                    $dados['cultura'],
+                    $dados['data_plantio'],
+                    $dados['data_colheita']
+                );
 
-                $dataPlantio = $dataPlantioArray[$index] ?? null;
-                $dataColheita = $dataColheitaArray[$index] ?? null;
+            case 'excluir_canteiro':
+                // Garante que passamos somente o ID (string ou int), não o array
+                $id = isset($dados['idCanteiros']) ? $dados['idCanteiros'] : $dados['idCanteiro'];
+                return $this->canteiroModel->deleteCanteiro($id);
 
-                $stmt = $this->pdo->prepare("
-                   INSERT INTO canteiros 
-                    (horta_idHorta, Cultura, DataPlantio, DataColheira)
-                    VALUES (?, ?, ?, ?)
-                ");
+            case 'vincular_dispositivo':
+                return $this->canteiroModel->linkDispositivo(
+                    $dados['idCanteiros'],
+                    $dados['idDispositivo']
+                );
 
-                if (
-                    !$stmt->execute([
-                        $idHorta,
-                        $cultura,
-                        $dataPlantio,
-                        $dataColheita
-                    ])
-                ) {
-                    $this->pdo->rollBack();
+            case 'desvincular_dispositivo':
+                return $this->canteiroModel->unlinkDispositivo($dados['idDispositivo']);
 
-                    return false;
-                }
-            }
+            case 'getCanteirosByHorta':
+                return $this->canteiroModel->getCanteirosByHorta($dados['idHorta']);
 
-            $this->pdo->commit();
-            return true;
-        } catch (PDOException $e) {
-            $this->pdo->rollBack();
-            echo "Erro ao criar canteiro: " . $e->getMessage();
-            return false;
+            case 'getDispositivosByCanteiro':
+                return $this->canteiroModel->getDispositivosByCanteiro($dados['idCanteiro']);
+
+            default:
+                return false;
         }
     }
 
-    // Obtém todos os canteiros de uma horta
-    public function getCanteirosByHorta($idHorta)
+    private function adicionarCanteiro($dados, $usuarioId)
     {
-        try {
-            $stmt = $this->pdo->prepare("
-                SELECT * FROM canteiros 
-                WHERE horta_idHorta = ?
-            ");
-            $stmt->execute([$idHorta]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Erro ao buscar canteiros: " . $e->getMessage());
-            return [];
+        if (
+            empty($dados['idHorta']) ||
+            empty($dados['cultura']) ||
+            empty($dados['data_plantio']) ||
+            empty($dados['data_colheita'])
+        ) {
+            throw new Exception('Todos os campos são obrigatórios');
         }
-    }
 
-    // Obtém um canteiro específico pelo ID
-    public function getCanteiroById($idCanteiro)
-    {
-        try {
-            $stmt = $this->pdo->prepare("
-                SELECT * FROM Canteiro 
-                WHERE idCanteiro = :canteido_id
-            ");
-            $stmt->execute([
-                'canteiro_id' => $idCanteiro
-            ]);
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Erro ao buscar canteiro: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    // Atualiza um canteiro existente
-    public function updateCanteiro($idCanteiro, $Cultura, $DataPlantio, $DataColheita)
-    {
-        try {
-            $stmt = $this->pdo->prepare("
-                UPDATE canteiros SET
-                    Cultura = ?,
-                    DataPlantio = ?,
-                    DataColheira = ?
-                WHERE idCanteiros = ?
-            ");
-
-            return $stmt->execute([
-                $Cultura,
-                $DataPlantio,
-                $DataColheita,
-                $idCanteiro
-            ]);
-        } catch (PDOException $e) {
-            error_log("Erro ao atualizar canteiro: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    // Exclui um canteiro
-    public function deleteCanteiro($idCanteiro)
-    {
-        try {
-            $this->pdo->beginTransaction();
-            $stmt1 = $this->pdo->prepare("
-            UPDATE Dispositivo
-               SET canteiro_id = NULL
-             WHERE canteiro_id = ?
-        ");
-            $stmt1->execute([$idCanteiro]);
-            $stmt2 = $this->pdo->prepare("
-            DELETE FROM canteiros
-             WHERE idCanteiros = ?
-        ");
-            $stmt2->execute([$idCanteiro]);
-
-            $this->pdo->commit();
-            return true;
-        } catch (PDOException $e) {
-            $this->pdo->rollBack();
-            error_log("Erro ao excluir canteiro: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    // Vincula um dispositivo a um canteiro
-    public function linkDispositivo($idCanteiro, $idDispositivo)
-    {
-        try {
-            $stmt = $this->pdo->prepare("
-            UPDATE Dispositivo 
-            SET canteiro_id = :canteiro_id
-            WHERE idDispositivo = :idDispositivo
-        ");
-            return $stmt->execute([
-                ':canteiro_id' => $idCanteiro,
-                ':idDispositivo' => $idDispositivo
-            ]);
-        } catch (PDOException $e) {
-            error_log("Erro ao vincular dispositivo: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    // Remove vínculo de um dispositivo
-    public function unlinkDispositivo($idDispositivo)
-    {
-        try {
-            $stmt = $this->pdo->prepare("
-            UPDATE Dispositivo 
-            SET canteiro_id = NULL
-            WHERE idDispositivo = :idDispositivo
-        ");
-            return $stmt->execute([':idDispositivo' => $idDispositivo]);
-        } catch (PDOException $e) {
-            error_log("Erro ao desvincular dispositivo: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    // Obtém todos dispositivos de um canteiro
-    public function getDispositivosByCanteiro($idCanteiro)
-    {
-        try {
-            $stmt = $this->pdo->prepare("
-            SELECT * FROM Dispositivo 
-            WHERE canteiro_id = :canteiro_id
-        ");
-            $stmt->execute([':canteiro_id' => $idCanteiro]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Erro ao buscar dispositivos: " . $e->getMessage());
-            return [];
-        }
+        return $this->canteiroModel->createCanteiro(
+            $dados['idHorta'],
+            $dados['cultura'],
+            $dados['data_plantio'],
+            $dados['data_colheita'],
+            $usuarioId
+        );
     }
 }

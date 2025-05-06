@@ -9,20 +9,39 @@ class DispositivoController {
     }
 
     public function processarRequisicao() {
-        session_start();
-        
-        // Obter dados para views
-        $dispositivos = $this->model->getAllDispositivos();
-        $dispositivosIDs = $this->model->getAllDispositivosid($_SESSION['user_id']);
-        
-        // Processar POST
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $this->processarPost($_POST, $_SESSION['user_id']);
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (empty($_SESSION['user_id'])) {
+            header('Location: ' . BASE_PATH . '/index.php?page=login');
+            exit;
         }
-        
-        // Carregar view
-        require '../Views/gerenciardispositivos.php';
+        $userId = $_SESSION['user_id'];
+    
+        // Processar POST normalmente
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->processarPost($_POST, $userId);
+        }
+    
+        // Buscar os dados atualizados
+        $dispositivos    = $this->model->getAllDispositivos();
+        $dispositivosIDs = $this->model->getAllDispositivosid($userId);
+    
+        // Se for requisição AJAX, devolve JSON e sai
+        if (
+            isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+        ) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'available' => $dispositivos,
+                'assigned'  => $dispositivosIDs
+            ]);
+            exit;
+        }
+    
+        // Senão, carrega a página completa
+        require __DIR__ . '/../View/gerenciardispositivos.php';
     }
+    
 
     private function processarPost($postData, $userId) {
         $acao = $postData['acao'] ?? '';
