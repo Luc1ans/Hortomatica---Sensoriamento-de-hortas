@@ -63,6 +63,10 @@
                             <button class="btn btn-success w-100 mb-2" onclick="toggleModal('modalCanteiros<?= $idH ?>')">
                                 <i class="bi bi-eye"></i> Ver Canteiros
                             </button>
+                            <button class="btn btn-info w-100 mb-2"
+                                onclick="window.location.href='<?= BASE_PATH ?>/View/AnaliseDados.php?idHorta=<?= $idH ?>'">
+                                <i class="bi bi-bar-chart-line"></i> Análise de dados
+                            </button>
                         </div>
                     </div>
                 </div>
