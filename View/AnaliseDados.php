@@ -10,63 +10,100 @@
     <?php include __DIR__ . '/../Assets/navbar.php'; ?>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-        google.charts.load('current', { 'packages': ['corechart'] });
+        console.log('Iniciando drawCharts…');
+        google.charts.load('current', { packages: ['corechart'] });
         google.charts.setOnLoadCallback(drawCharts);
+        
+        function parseTimestamp(ts) {
+            const [datePart, timePart] = ts.split(' ');
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hour, minute, second] = timePart.split(':').map(Number);
+            return new Date(year, month - 1, day, hour, minute, second);
+        }
 
         function drawCharts() {
-            var chartData = <?php echo json_encode($chartData); ?>;
-            var dispositivosSelecionados = <?php echo json_encode($dispositivosSelecionados); ?>;
-            for (var sensorName in chartData) {
-                var safeId = sensorName.replace(/\W+/g, '_');
-                drawChart(safeId, sensorName, chartData[sensorName], dispositivosSelecionados);
+            const chartData = <?= json_encode($chartData) ?>;
+            const selDevices = <?= json_encode($selDevices) ?>;
+            const promises = [];
+
+            for (const sensorName in chartData) {
+                const safeId = sensorName.replace(/\W+/g, '_');
+                promises.push(new Promise(resolve => {
+                    drawChart(safeId, sensorName, chartData[sensorName], selDevices, resolve);
+                }));
             }
+
+            Promise.all(promises)
+                .then(() => {
+                    console.log('Todos os gráficos renderizados!');
+                    document.getElementById('pdfSubmit').disabled = false;
+                })
+                .catch(err => {
+                    console.error('Erro ao renderizar gráficos:', err);
+                    document.getElementById('pdfSubmit').disabled = false;
+                });
         }
 
-        function drawChart(safeId, sensorName, rows, dispositivos) {
-            var container = document.getElementById('chart_' + safeId);
+        function drawChart(safeId, sensorName, rows, dispositivos, resolve) {
+            const container = document.getElementById('chart_' + safeId);
             if (!container) {
                 console.error('Container não encontrado: chart_' + safeId);
-                return;
+                return resolve();
             }
 
-            var data = new google.visualization.DataTable();
+            // Formata as linhas com Date válido
+            const formattedRows = rows.map(r => {
+                const dateObj = parseTimestamp(r[0]);
+                return [dateObj, ...r.slice(1)];
+            });
+            console.log('Linhas formatadas para', sensorName, formattedRows);
+
+            const data = new google.visualization.DataTable();
             data.addColumn('datetime', 'Data e Hora');
             dispositivos.forEach(id => data.addColumn('number', 'Disp ' + id));
-            var formattedRows = rows.map(r => [new Date(r[0]), ...r.slice(1)]);
             data.addRows(formattedRows);
 
-            var options = {
+            const options = {
                 title: 'Leituras do Sensor: ' + sensorName,
                 legend: { position: 'bottom' },
-                hAxis: { title: 'Data e Hora', format: 'yyyy/MM/dd HH:mm', slantedText: true },
+                hAxis: {
+                    title: 'Data e Hora',
+                    format: 'yyyy/MM/dd HH:mm',
+                    slantedText: true,
+                    slantedTextAngle: 45
+                },
                 vAxis: { title: 'Valor' },
                 backgroundColor: '#f8f9fa',
-                chartArea: { backgroundColor: '#f8f9fa' }
+                chartArea: { width: '85%', height: '70%', backgroundColor: '#f8f9fa' }
             };
 
-            // 1) Cria e desenha o gráfico
-            var chart = new google.visualization.LineChart(container);
-            chart.draw(data, options);
+            const chart = new google.visualization.LineChart(container);
+            google.visualization.events.addListener(chart, 'ready', () => {
+                const imgUri = chart.getImageURI();
+                const inputId = 'img_' + safeId;
+                let input = document.getElementById(inputId);
+                if (!input) {
+                    input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.id = inputId;
+                    input.name = inputId;
+                    document.querySelector('#pdfForm #chartImagesContainer').appendChild(input);
+                }
+                input.value = imgUri;
+                console.log('Gráfico renderizado e input criado:', sensorName);
+                resolve();
+            });
 
-            // 2) Depois de desenhado, captura a imagem
-            var imgUri = chart.getImageURI();
-
-            // 3) Cria o input hidden e ANEXA DENTRO do form de PDF
-            var input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'img_' + safeId;
-            input.value = imgUri;
-
-            // garante que #chartImagesContainer esteja dentro do <form id="pdfForm">
-            document.querySelector('#pdfForm #chartImagesContainer').appendChild(input);
+            try {
+                chart.draw(data, options);
+            } catch (err) {
+                console.error('Erro ao desenhar gráfico', sensorName, err);
+                resolve();
+            }
         }
-
     </script>
-
 </head>
-
 <body>
-
     <div class="container mt-4">
         <h3><i class="bi bi-graph-up me-2 text-success"></i>Análise de Dados</h3>
 
@@ -124,6 +161,8 @@
         </form>
 
         <div id="charts">
+
+
             <div class="row g-4 mb-4">
                 <!-- Gerar PDF -->
                 <div class="col-md-6">
@@ -150,7 +189,7 @@
                                 <input type="hidden" name="data_final"
                                     value="<?= htmlspecialchars($filtroDataFinal, ENT_QUOTES) ?>">
                                 <div id="chartImagesContainer"></div>
-                                <button type="submit" class="btn btn-outline-danger w-100 mt-3">
+                                <button type="submit" id="pdfSubmit" class="btn btn-outline-danger w-100 mt-3" disabled>
                                     <i class="bi bi-download me-1"></i>Baixar PDF
                                 </button>
                             </form>
@@ -259,29 +298,6 @@
 
     <!-- SCRIPTS DE CHARTS -->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script>
-        google.charts.load('current', { packages: ['corechart'] });
-        google.charts.setOnLoadCallback(() => {
-            const chartData = <?= json_encode($chartData) ?>;
-            const selDevices = <?= json_encode($selDevices) ?>;
-
-            for (let sensor in chartData) {
-                const rows = chartData[sensor];
-                const dataTable = new google.visualization.DataTable();
-                dataTable.addColumn('datetime', 'Data e Hora');
-                selDevices.forEach(id => dataTable.addColumn('number', 'Disp ' + id));
-                const formatted = rows.map(r => [new Date(r[0]), ...r.slice(1)]);
-                dataTable.addRows(formatted);
-
-                const options = {
-                    hAxis: { format: 'yyyy/MM/dd HH:mm', slantedText: true },
-                    legend: { position: 'bottom' }
-                };
-                const div = document.getElementById('chart_' + sensor.replace(/\W+/g, '_'));
-                new google.visualization.LineChart(div).draw(dataTable, options);
-            }
-        });
-    </script>
 
     <?php include __DIR__ . '/../Assets/footer.php'; ?>
 </body>
