@@ -12,9 +12,6 @@ class Leitura
         $this->conn = $pdo;
     }
 
-    /**
-     * Insere uma nova leitura na tabela.
-     */
     public function create(
         string $hora_leitura,
         string $data_leitura,
@@ -37,18 +34,12 @@ class Leitura
         return $stmt->execute();
     }
 
-    /**
-     * Retorna todas as leituras, sem filtro.
-     */
     public function getAll(): array
     {
         $stmt = $this->conn->query("SELECT * FROM LeituraSensores");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Retorna uma leitura específica pelo seu ID (se houver PK).
-     */
     public function getById(int $idLeitura): ?array
     {
         $stmt = $this->conn->prepare(
@@ -59,10 +50,6 @@ class Leitura
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
     }
-
-    /**
-     * Retorna leituras de um dispositivo, com filtros opcionais de sensor e data.
-     */
     public function getByDispositivo(
         int    $idDispositivo,
         string $sensor      = '',
@@ -95,9 +82,6 @@ class Leitura
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Retorna as últimas N leituras de um dispositivo.
-     */
     public function getLatestByDispositivo(int $idDispositivo, int $limit = 5): array
     {
         $stmt = $this->conn->prepare(
@@ -113,9 +97,6 @@ class Leitura
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * (Opcional) Exclui leituras anteriores a uma data, para limpeza de tabela.
-     */
     public function deleteOlderThan(string $dataLimite): bool
     {
         $stmt = $this->conn->prepare(

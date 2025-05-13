@@ -6,25 +6,22 @@ require __DIR__ . '/vendor/autoload.php';
 use Controller\Database;
 // Verifica se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Obtém os dados enviados pelo formulário
     $usuario = $_POST['usuario'] ?? '';
     $email = $_POST['email'] ?? '';
     $telefone = $_POST['telefone'] ?? '';
-    $senha = $_POST['password'] ?? ''; // Alterando para 'senha'
-    $confirmSenha = $_POST['confirmPassword'] ?? ''; // Alterando para 'senha'
+    $senha = $_POST['password'] ?? ''; 
+    $confirmSenha = $_POST['confirmPassword'] ?? ''; 
 
-    // Verifica se as senhas são iguais
     if ($senha !== $confirmSenha) {
         $_SESSION['error_message'] = 'As senhas não coincidem.';
         header('Location: cadastro.php');
         exit;
     }
 
-    // Conectar ao banco de dados
-    require_once __DIR__ . '/../Controller/Database.php'; // Caminho para o arquivo de conexão com o banco
+    require_once __DIR__ . '/../Controller/Database.php';
 
     try {
-        // Verifica se o e-mail já está cadastrado
+
         $db = Database::connect();
         $query = $db->prepare('SELECT * FROM usuario WHERE email = :email');
         $query->bindParam(':email', $email);
@@ -32,22 +29,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $query->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
-            // Caso o e-mail já esteja cadastrado
             $_SESSION['error_message'] = 'Este e-mail já está em uso.';
             header('Location: cadastro.php');
             exit;
         }
 
-        // Se o e-mail não estiver em uso, insere o novo usuário no banco de dados
-        $hashedSenha = password_hash($senha, PASSWORD_DEFAULT); // Alterando para 'senha'
+      
+        $hashedSenha = password_hash($senha, PASSWORD_DEFAULT);
         $insertQuery = $db->prepare('INSERT INTO usuario (usuario, email, telefone, senha) VALUES (:usuario, :email, :telefone, :senha)');
         $insertQuery->bindParam(':usuario', $usuario);
         $insertQuery->bindParam(':email', $email);
         $insertQuery->bindParam(':telefone', $telefone);
-        $insertQuery->bindParam(':senha', $hashedSenha); // Alterando para 'senha'
+        $insertQuery->bindParam(':senha', $hashedSenha); 
         $insertQuery->execute();
 
-        // Cadastro bem-sucedido
         $_SESSION['success_message'] = 'Cadastro realizado com sucesso! Agora, faça login.';
         header('Location: login.php');
         exit;

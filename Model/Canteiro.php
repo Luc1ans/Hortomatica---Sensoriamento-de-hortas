@@ -11,7 +11,6 @@ class Canteiro
         $this->pdo = $pdo;
     }
 
-    // Cria um novo canteiro vinculado a uma horta
     public function createCanteiro($idHorta, $culturaArray, $dataPlantioArray, $dataColheitaArray)
     {
         try {
@@ -51,7 +50,6 @@ class Canteiro
         }
     }
 
-    // Obtém todos os canteiros de uma horta
     public function getCanteirosByHorta($idHorta)
     {
         try {
@@ -67,7 +65,6 @@ class Canteiro
         }
     }
 
-    // Obtém um canteiro específico pelo ID
     public function getCanteiroById($idCanteiro)
     {
         try {
@@ -85,7 +82,6 @@ class Canteiro
         }
     }
 
-    // Atualiza um canteiro existente
     public function updateCanteiro($idCanteiro, $Cultura, $DataPlantio, $DataColheita)
     {
         try {
@@ -109,7 +105,6 @@ class Canteiro
         }
     }
 
-    // Exclui um canteiro
     public function deleteCanteiro($idCanteiro)
     {
         try {
@@ -135,7 +130,6 @@ class Canteiro
         }
     }
 
-    // Vincula um dispositivo a um canteiro
     public function linkDispositivo($idCanteiro, $idDispositivo)
     {
         try {
@@ -154,7 +148,6 @@ class Canteiro
         }
     }
 
-    // Remove vínculo de um dispositivo
     public function unlinkDispositivo($idDispositivo)
     {
         try {
@@ -169,8 +162,7 @@ class Canteiro
             return false;
         }
     }
-
-    // Obtém todos dispositivos de um canteiro
+    
     public function getDispositivosByCanteiro($idCanteiro)
     {
         try {

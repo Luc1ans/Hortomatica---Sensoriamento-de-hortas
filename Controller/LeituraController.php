@@ -23,29 +23,24 @@ class LeituraController {
     }
 
     public function processarRequisicao(): void {
-        // 1) Captura e valida idHorta
         $idHorta = (int)($_GET['idHorta'] ?? 0);
         if (!$idHorta) {
             throw new \Exception('ID da horta não recebido.');
         }
 
-        // 2) Busca canteiros da horta
         $canteiros = $this->canteiroModel->getCanteirosByHorta($idHorta);
         if (empty($canteiros)) {
             throw new \Exception('Nenhum canteiro cadastrado para esta horta.');
         }
 
-        // 3) Define o canteiro selecionado
         $selectedCanteiro = (int)($_GET['idCanteiro'] ?? $canteiros[0]['idCanteiros']);
 
-        // 4) Busca dispositivos vinculados
         $devices = $this->dispositivoModel->getDispositivoByCanteiro($selectedCanteiro);
         if (empty($devices)) {
             throw new \Exception('Nenhum dispositivo vinculado a este canteiro.');
         }
         $allDeviceIds = array_column($devices, 'idDispositivo');
 
-        // 5) Captura filtros do GET
         $filtroSensor      = $_GET['sensor']        ?? '';
         $filtroDataInicial = $_GET['data_inicial']  ?? '';
         $filtroDataFinal   = $_GET['data_final']    ?? '';
@@ -53,10 +48,8 @@ class LeituraController {
         if (!is_array($selDevices)) {
             $selDevices = explode(',', (string)$selDevices);
         }
-        // garante inteiros
         $selDevices = array_map('intval', $selDevices);
 
-        // 6) BUSCA de leituras
         $leituras       = [];
         $ultimas        = [];
         foreach ($selDevices as $idDisp) {
@@ -69,8 +62,6 @@ class LeituraController {
                 $this->leituraModel->getLatestByDispositivo($idDisp)
             );
         }
-
-        // 7) Monta $chartData: [ sensor => [ [ts, val_disp1, val_disp2,…], … ] ]
         $porSensor = [];
         foreach ($leituras as $l) {
             $sensor = $l['nome_sensor'];
@@ -92,7 +83,6 @@ class LeituraController {
             $chartData[$sensor] = $rows;
         }
 
-        // 8) Renderiza view, passando só variáveis
         require __DIR__ . '/../View/AnaliseDados.php';
     }
 }

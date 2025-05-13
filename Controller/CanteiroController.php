@@ -22,7 +22,6 @@ class CanteiroController
                 return $this->adicionarCanteiro($dados, $usuarioId);
 
             case 'editar_canteiro':
-                // Extrai os campos individuais em vez de passar o array todo
                 return $this->canteiroModel->updateCanteiro(
                     $dados['idCanteiro'],            
                     $dados['cultura'],
@@ -31,7 +30,6 @@ class CanteiroController
                 );
 
             case 'excluir_canteiro':
-                // Garante que passamos somente o ID (string ou int), não o array
                 $id = isset($dados['idCanteiros']) ? $dados['idCanteiros'] : $dados['idCanteiro'];
                 return $this->canteiroModel->deleteCanteiro($id);
 

@@ -30,15 +30,12 @@ class HortaController {
         }
         $userId = $_SESSION['user_id'];
 
-        // Processar POST de hortas ou canteiros
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->processarPost($_POST, $userId);
         }
 
-        // Obter hortas do usuário
         $hortas = $this->model->getHortasByUsuario($userId);
 
-        // Construir mapa de canteiros e dispositivos para a view limpa
         $canteirosMap = [];
         $dispMap = [];
         foreach ($hortas as $horta) {
@@ -51,7 +48,6 @@ class HortaController {
             }
         }
 
-        // Busca dispositivos livres do usuário
         $dispositivosLivres = $this->dispositivoModel->getAvailableDispositivos($userId);
 
         if (
