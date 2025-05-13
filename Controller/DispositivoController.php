@@ -16,17 +16,14 @@ class DispositivoController {
             exit;
         }
         $userId = $_SESSION['user_id'];
-    
-        // Processar POST normalmente
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->processarPost($_POST, $userId);
         }
     
-        // Buscar os dados atualizados
         $dispositivos    = $this->model->getAllDispositivos();
         $dispositivosIDs = $this->model->getAllDispositivosid($userId);
     
-        // Se for requisição AJAX, devolve JSON e sai
         if (
             isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
             strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
@@ -39,7 +36,6 @@ class DispositivoController {
             exit;
         }
     
-        // Senão, carrega a página completa
         require __DIR__ . '/../View/gerenciardispositivos.php';
     }
     
@@ -49,6 +45,8 @@ class DispositivoController {
         
         if ($acao === 'adicionar') {
             $this->adicionarDispositivo($postData, $userId);
+        } elseif ($acao === 'editar') {
+            $this->editarDispositivo($postData, $userId);
         } elseif ($acao === 'excluir') {
             $this->excluirDispositivo($postData);
         }
@@ -57,22 +55,52 @@ class DispositivoController {
     private function adicionarDispositivo($dados, $userId) {
         $idDispositivo = $dados['idDispositivo'] ?? '';
         $nome = htmlspecialchars($dados['nome'] ?? '', ENT_QUOTES, 'UTF-8');
+        $localizacao = htmlspecialchars($dados['localizacao'] ?? '', ENT_QUOTES, 'UTF-8');
         $status = htmlspecialchars($dados['status'] ?? 'Ativo', ENT_QUOTES, 'UTF-8');
         $dataInstalacao = $dados['dataInstalacao'] ?? '';
 
-        if (empty($idDispositivo) || empty($nome) || empty($dataInstalacao)) {
+        if (empty($idDispositivo) || empty($nome) || empty($localizacao) || empty($dataInstalacao)) {
             $_SESSION['mensagem'] = 'Por favor, preencha todos os campos obrigatórios!';
             $_SESSION['tipo_mensagem'] = 'erro';
         } else {
-            $this->model->updateDispositivo(
+            $this->model->createDispositivo(
                 $idDispositivo,
                 $nome,
+                $localizacao,
                 $status,
                 $dataInstalacao,
                 $userId
             );
             $_SESSION['mensagem'] = 'Dispositivo adicionado com sucesso!';
             $_SESSION['tipo_mensagem'] = 'sucesso';
+        }
+    }
+
+    private function editarDispositivo($dados, $userId) {
+        $idDispositivo = $dados['idDispositivo'] ?? '';
+        $nome = htmlspecialchars($dados['nome'] ?? '', ENT_QUOTES, 'UTF-8');
+        $localizacao = htmlspecialchars($dados['localizacao'] ?? '', ENT_QUOTES, 'UTF-8');
+        $status = htmlspecialchars($dados['status'] ?? 'Ativo', ENT_QUOTES, 'UTF-8');
+        $dataInstalacao = $dados['dataInstalacao'] ?? '';
+
+        if (empty($idDispositivo) || empty($nome) || empty($localizacao) || empty($dataInstalacao)) {
+            $_SESSION['mensagem'] = 'Por favor, preencha todos os campos obrigatórios!';
+            $_SESSION['tipo_mensagem'] = 'erro';
+        } else {
+            if ($this->model->updateDispositivo(
+                $idDispositivo,
+                $nome,
+                $localizacao,
+                $status,
+                $dataInstalacao,
+                $userId
+            )) {
+                $_SESSION['mensagem'] = 'Dispositivo atualizado com sucesso!';
+                $_SESSION['tipo_mensagem'] = 'sucesso';
+            } else {
+                $_SESSION['mensagem'] = 'Erro ao atualizar o dispositivo.';
+                $_SESSION['tipo_mensagem'] = 'erro';
+            }
         }
     }
 
