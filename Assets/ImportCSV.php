@@ -57,7 +57,6 @@ $stmt = $pdo->prepare("
       (:data_leitura, :hora_leitura, :nome_sensor, :valor_leitura, :disp, 'CSV')
 ");
 
-// Loop seguro até EOF
 while (($raw = fgets($handle)) !== false) {
     $line = trim($raw);
     if ($line === '') {
@@ -99,8 +98,6 @@ while (($raw = fgets($handle)) !== false) {
 }
 
 fclose($handle);
-
-// Redireciona de volta para análise, mantendo page=analise
 header(
     "Location: ../index.php?page=analise&idHorta={$idHorta}&imported=1&dispositivos[]={$idDispositivo}"
 );

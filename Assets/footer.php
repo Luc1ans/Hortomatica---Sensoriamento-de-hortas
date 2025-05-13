@@ -1,7 +1,6 @@
 <div class="site-footer ">
     <div class="container">
         <div class="footer-content">
-            <!-- Seção Institucional -->
             <div class="footer-section">
                 <h5 class="footer-title">Hortomática</h5>
                 <ul class="footer-links">
@@ -12,7 +11,6 @@
                 </ul>
             </div>
 
-            <!-- Seção de Apoio -->
             <div class="footer-section">
                 <h5 class="footer-title">Apoio</h5>
                 <div class="apoio-logos">                  

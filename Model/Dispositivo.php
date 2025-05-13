@@ -49,7 +49,6 @@ class Dispositivo
         return $stmt->execute();
     }
 
-    // Função para buscar todos os dispositivos
     public function getAllDispositivos()
     {
         $sql = "SELECT idDispositivo, localizacao FROM Dispositivo WHERE user_id IS NULL";

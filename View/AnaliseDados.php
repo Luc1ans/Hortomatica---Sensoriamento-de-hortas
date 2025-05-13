@@ -13,7 +13,7 @@
         console.log('Iniciando drawCharts…');
         google.charts.load('current', { packages: ['corechart'] });
         google.charts.setOnLoadCallback(drawCharts);
-        
+
         function parseTimestamp(ts) {
             const [datePart, timePart] = ts.split(' ');
             const [year, month, day] = datePart.split('-').map(Number);
@@ -50,8 +50,6 @@
                 console.error('Container não encontrado: chart_' + safeId);
                 return resolve();
             }
-
-            // Formata as linhas com Date válido
             const formattedRows = rows.map(r => {
                 const dateObj = parseTimestamp(r[0]);
                 return [dateObj, ...r.slice(1)];
@@ -161,8 +159,6 @@
         </form>
 
         <div id="charts">
-
-
             <div class="row g-4 mb-4">
                 <!-- Gerar PDF -->
                 <div class="col-md-6">
