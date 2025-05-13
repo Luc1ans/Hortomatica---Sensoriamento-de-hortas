@@ -13,8 +13,8 @@ require_once('Logout.php');
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-                <a class="nav-link navbar-text" href="<?= BASE_PATH ?>/GerenciarHortas.php">Gerenciar Hortas</a>
-                <a class="nav-link navbar-text" href="<?= BASE_PATH ?>/GerenciarDispositivos.php">Gerenciar
+                <a class="nav-link navbar-text" href="index.php?page=gerenciar_hortas">Gerenciar Hortas</a>
+                <a class="nav-link navbar-text" href="index.php?page=gerenciar_dispositivos">Gerenciar
                     Dispositivos</a>
                 <a class="nav-link navbar-text" href="<?= BASE_PATH ?>/Relatorio.php">Relatórios</a>
             </div>
