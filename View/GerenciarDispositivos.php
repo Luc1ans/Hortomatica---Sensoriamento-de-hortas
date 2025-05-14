@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="<?= BASE_PATH ?>/Assets/css/style.css">
     <title>Gerenciar Dispositivos</title>
-    <?php include __DIR__ . '/../Assets/navbar.php'; ?>
+    <?php include __DIR__ . '/layout/navbar.php'; ?>
 </head>
 
 <body>
@@ -169,17 +169,8 @@
         </div>
     </div>
 
-    <script>
-        window.onclick = function (event) {
-            var modals = document.getElementsByClassName('modal');
-            for (var i = 0; i < modals.length; i++) {
-                if (event.target == modals[i]) {
-                    modals[i].style.display = "none";
-                }
-            }
-        }
-    </script>
-    <?php include __DIR__ . '/../Assets/footer.php'; ?>
+    <script src="<?= BASE_PATH ?>/Assets/js/GerenciarDispositivos.js" defer></script>                                 
+    <?php include __DIR__ . '/layout/footer.php'; ?>
 </body>
 
 </html>

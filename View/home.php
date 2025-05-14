@@ -10,12 +10,11 @@
     <link rel="stylesheet" href="<?= BASE_PATH ?>/Assets/css/style.css">
     <?php
     $base_path = $_SERVER['DOCUMENT_ROOT'] . '/Site Hortomatica/Hortomatica---Sensoriamento-de-hortas/';
-    include __DIR__ . '/../Assets/navbar.php';
+    include __DIR__ . '/layout/navbar.php';
     ?>
 </head>
 
 <body class="d-flex flex-column min-vh-100">
-    <!-- Área de botões -->
     <div class="conteudo flex-grow-1">
         <div class="container">
             <div class="row justify-content-center g-4">
@@ -42,7 +41,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <?php include __DIR__ . '/../Assets/footer.php'; ?>
+    <?php include __DIR__ . '/layout/footer.php'; ?>
 </body>
 
 </html>

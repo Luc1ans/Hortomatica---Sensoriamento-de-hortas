@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="<?= BASE_PATH ?>/Assets/css/style.css">
-    <?php include __DIR__ . '/../Assets/navbar.php'; ?>
+    <?php include __DIR__ . '/layout/navbar.php'; ?>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
         console.log('Iniciando drawCharts…');
@@ -24,9 +24,11 @@
         function drawCharts() {
             const chartData = <?= json_encode($chartData) ?>;
             const selDevices = <?= json_encode($selDevices) ?>;
+            const exclude = ['chuva digital', 'Lat', 'Lng'];
             const promises = [];
 
             for (const sensorName in chartData) {
+                if (exclude.includes(sensorName.toLowerCase())) continue;
                 const safeId = sensorName.replace(/\W+/g, '_');
                 promises.push(new Promise(resolve => {
                     drawChart(safeId, sensorName, chartData[sensorName], selDevices, resolve);
@@ -50,11 +52,11 @@
                 console.error('Container não encontrado: chart_' + safeId);
                 return resolve();
             }
+
             const formattedRows = rows.map(r => {
                 const dateObj = parseTimestamp(r[0]);
                 return [dateObj, ...r.slice(1)];
             });
-            console.log('Linhas formatadas para', sensorName, formattedRows);
 
             const data = new google.visualization.DataTable();
             data.addColumn('datetime', 'Data e Hora');
@@ -85,10 +87,14 @@
                     input.type = 'hidden';
                     input.id = inputId;
                     input.name = inputId;
-                    document.querySelector('#pdfForm #chartImagesContainer').appendChild(input);
+                    const chartImagesContainer = document.getElementById('chartImagesContainer');
+                    if (chartImagesContainer) {
+                        chartImagesContainer.appendChild(input);
+                    } else {
+                        console.warn('chartImagesContainer não encontrado, pulando appendChild.');
+                    }
                 }
-                input.value = imgUri;
-                console.log('Gráfico renderizado e input criado:', sensorName);
+                if (input) input.value = imgUri;
                 resolve();
             });
 
@@ -101,6 +107,7 @@
         }
     </script>
 </head>
+
 <body>
     <div class="container mt-4">
         <h3><i class="bi bi-graph-up me-2 text-success"></i>Análise de Dados</h3>
@@ -150,85 +157,23 @@
                     <input type="date" name="data_final" value="<?= $filtroDataFinal ?>" class="form-control">
                 </div>
             </div>
-
             <div class="mt-3">
                 <button class="btn btn-primary"><i class="bi bi-filter me-1"></i>Filtrar</button>
-                <a href="?page=analise&idHorta=<?= htmlspecialchars($idHorta, ENT_QUOTES) ?>"
-                    class="btn btn-secondary"><i class="bi bi-arrow-clockwise"></i>Limpar</a>
+                <a href="?page=analise&idHorta=<?= htmlspecialchars($idHorta, ENT_QUOTES) ?>" class="btn btn-secondary"><i class="bi bi-arrow-clockwise"></i>Limpar</a>
             </div>
         </form>
-
         <div id="charts">
             <div class="row g-4 mb-4">
-                <!-- Gerar PDF -->
-                <div class="col-md-6">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title text-danger">
-                                <i class="bi bi-file-earmark-pdf me-2"></i>Gerar Relatório PDF
-                            </h5>
-                            <p class="card-text flex-grow-1">
-                                Faça o download de um relatório completo das leituras atuais para a horta selecionada.
-                            </p>
-                            <form id="pdfForm" method="POST" action="<?= BASE_PATH ?>/Assets/gerar_pdf.php"
-                                target="_blank">
-                                <input type="hidden" name="idHorta"
-                                    value="<?= htmlspecialchars($idHorta, ENT_QUOTES) ?>">
-                                <input type="hidden" name="idCanteiro"
-                                    value="<?= htmlspecialchars($selectedCanteiro, ENT_QUOTES) ?>">
-                                <input type="hidden" name="dispositivos"
-                                    value="<?= htmlspecialchars(implode(',', $selDevices), ENT_QUOTES) ?>">
-                                <input type="hidden" name="sensor"
-                                    value="<?= htmlspecialchars($filtroSensor, ENT_QUOTES) ?>">
-                                <input type="hidden" name="data_inicial"
-                                    value="<?= htmlspecialchars($filtroDataInicial, ENT_QUOTES) ?>">
-                                <input type="hidden" name="data_final"
-                                    value="<?= htmlspecialchars($filtroDataFinal, ENT_QUOTES) ?>">
-                                <div id="chartImagesContainer"></div>
-                                <button type="submit" id="pdfSubmit" class="btn btn-outline-danger w-100 mt-3" disabled>
-                                    <i class="bi bi-download me-1"></i>Baixar PDF
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Importar CSV -->
-                <div class="col-md-6">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title text-primary">
-                                <i class="bi bi-upload me-2"></i>Importar CSV
-                            </h5>
-                            <p class="card-text flex-grow-1">
-                                Carregue um arquivo CSV de leituras para inserir novos dados no banco (somente linhas
-                                posteriores à última leitura).
-                            </p>
-                            <form method="POST" action="<?= BASE_PATH ?>/Assets/importCSV.php"
-                                enctype="multipart/form-data">
-                                <input type="hidden" name="idHorta"
-                                    value="<?= htmlspecialchars($idHorta, ENT_QUOTES) ?>">
-                                <input type="hidden" name="idCanteiro"
-                                    value="<?= htmlspecialchars($selectedCanteiro, ENT_QUOTES) ?>">
-                                <div class="input-group">
-                                    <input type="file" name="csvFile" accept=".csv" class="form-control" required>
-                                    <button type="submit" class="btn btn-outline-primary">
-                                        Importar
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+                <!-- Gerar PDF e Importar CSV cards aqui -->
             </div>
-
             <?php foreach ($chartData as $sensor => $rows):
+                if (in_array(strtolower($sensor), ['chuva digital','longitude','latitude'])) continue;
                 $safe = preg_replace('/\W+/', '_', $sensor);
-                ?>
-                <div class="mb-4">
-                    <h5 class="text-success"><i class="bi bi-bar-chart-line me-2"></i><?= $sensor ?></h5>
-                    <div id="chart_<?= $safe ?>" style="height:300px;"></div>
-                </div>
+            ?>
+            <div class="mb-4">
+                <h5 class="text-success"><i class="bi bi-bar-chart-line me-2"></i><?= $sensor ?></h5>
+                <div id="chart_<?= $safe ?>" style="height:300px;"></div>
+            </div>
             <?php endforeach ?>
         </div>
 
@@ -263,9 +208,10 @@
             </div>
 
             <div class="col-lg-6">
-                <div class="card p-3">
+                <!-- Container auto-scrollable -->
+                <div class="card p-3" id="filteredContainer" style="max-height: 400px; overflow-y: auto;">
                     <h5 class="text-success"><i class="bi bi-table me-1"></i>Leituras Filtradas</h5>
-                    <table class="table">
+                    <table class="table mb-0">
                         <thead>
                             <tr>
                                 <th>Sensor</th>
@@ -292,10 +238,17 @@
         </div>
     </div>
 
-    <!-- SCRIPTS DE CHARTS -->
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <!-- Script para autoscroll do container de Leituras Filtradas -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('filteredContainer');
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        });
+    </script>
 
-    <?php include __DIR__ . '/../Assets/footer.php'; ?>
+    <?php include __DIR__ . '/layout/footer.php'; ?>
 </body>
 
 </html>

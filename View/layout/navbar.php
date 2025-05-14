@@ -1,5 +1,5 @@
 <?php
-require_once('Logout.php');
+require_once __DIR__ . '/../../Assets/Logout.php';
 
 ?>
 <nav class="navbar navbar-expand-lg bg-body-tertiary custom-navbar">
