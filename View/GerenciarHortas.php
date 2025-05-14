@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="<?= BASE_PATH ?>/Assets/css/style.css">
-    <?php include __DIR__ . '/../Assets/navbar.php'; ?>
+    <?php include __DIR__ . '/layout/navbar.php'; ?>
 </head>
 
 <body>
@@ -363,35 +363,7 @@
         </div>
     </div>
 
-    <script>
-        function toggleModal(id) {
-            const m = document.getElementById(id);
-            m.style.display = m.style.display === 'block' ? 'none' : 'block';
-        }
-        window.onclick = e => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; }
-
-        function adicionarCanteiroInputs(idHorta) {
-            const container = document.getElementById('canteiros-container-' + idHorta);
-            const novoGrupo = document.createElement('div');
-            novoGrupo.className = 'canteiro-group mb-3';
-            novoGrupo.innerHTML = `
-            <div class="mb-3">
-                <label>Cultura</label>
-                <input type="text" name="cultura[]" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label>Data de plantio</label>
-                <input type="date" name="data_plantio[]" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label>Data de colheita prevista</label>
-                <input type="date" name="data_colheita[]" class="form-control" required>
-            </div>
-        `;
-            container.appendChild(novoGrupo);
-        }
-    </script>
-
-    <?php include __DIR__ . '/../Assets/footer.php'; ?>
+     <script src="<?= BASE_PATH ?>/Assets/js/GerenciarHortas.js" defer></script>                                                    
+    <?php include __DIR__ . '/layout/footer.php'; ?>
 </body>
 </html>
