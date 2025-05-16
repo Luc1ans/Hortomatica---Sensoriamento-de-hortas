@@ -6,21 +6,24 @@ require_once __DIR__ . '/../Model/Canteiro.php';
 require_once __DIR__ . '/../Model/Dispositivo.php';
 require_once __DIR__ . '/../Controller/CanteiroController.php';
 
-class HortaController {
+class HortaController
+{
     private $model;
     private $canteiroController;
-    private $dispositivoModel; 
+    private $dispositivoModel;
 
-    public function __construct($hortaModel, $canteiroModel, $dispositivoModel) {
+    public function __construct($hortaModel, $canteiroModel, $dispositivoModel)
+    {
         $this->model = $hortaModel;
-        $this->dispositivoModel = $dispositivoModel; 
+        $this->dispositivoModel = $dispositivoModel;
         $this->canteiroController = new CanteiroController(
             $canteiroModel,
             $dispositivoModel
         );
     }
 
-    public function processarRequisicao() {
+    public function processarRequisicao()
+    {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -66,7 +69,8 @@ class HortaController {
         require __DIR__ . '/../View/gerenciarhortas.php';
     }
 
-    private function processarPost($data, $userId) {
+    private function processarPost($data, $userId)
+    {
         $acao = $data['acao'] ?? '';
         switch ($acao) {
             case 'adicionar':
@@ -79,14 +83,14 @@ class HortaController {
 
             case 'editar':
                 $this->model->updateHorta(
-                    (int)$data['idHorta'], 
+                    (int) $data['idHorta'],
                     htmlspecialchars($data['nome'] ?? '', ENT_QUOTES, 'UTF-8'),
                     htmlspecialchars($data['observacoes'] ?? '', ENT_QUOTES, 'UTF-8')
                 );
                 break;
 
             case 'excluir':
-                $this->model->deleteHorta((int)$data['idHorta']);
+                $this->model->deleteHorta((int) $data['idHorta']);
                 break;
 
             case 'listar_canteiros':
@@ -103,18 +107,19 @@ class HortaController {
                 $result = $this->canteiroController->processarAcao($acao, $data, $userId);
 
                 if ($result) {
-                    $_SESSION['mensagem']      = 'Operação realizada com sucesso!';
+                    $_SESSION['mensagem'] = 'Operação realizada com sucesso!';
                     $_SESSION['tipo_mensagem'] = 'success';
                 } else {
-                    $_SESSION['mensagem']      = 'Falha ao executar operação.';
+                    $_SESSION['mensagem'] = 'Falha ao executar operação.';
                     $_SESSION['tipo_mensagem'] = 'danger';
                 }
                 header('Location: ' . $_SERVER['REQUEST_URI']);
                 exit;
 
             default:
-                
+
                 break;
         }
     }
+
 }

@@ -51,5 +51,13 @@ class Horta
         $stmt->bindParam(':observacoes', $observacoes);
         return $stmt->execute();
     }
+    public function getHortaById(int $idHorta): array
+    {
+        $sql = "SELECT * FROM Horta WHERE idHorta = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':id', $idHorta, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+    }
 }
 ?>

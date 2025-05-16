@@ -175,8 +175,8 @@
                             <p class="card-text flex-grow-1">
                                 Faça o download de um relatório completo das leituras atuais para a horta selecionada.
                             </p>
-                            <form id="pdfForm" method="POST" action="<?= BASE_PATH ?>/Assets/gerar_pdf.php"
-                                target="_blank">
+                            <form method="POST" action="index.php?page=analise&acao=pdf" target="_blank">
+                                <input type="hidden" name="idHorta" value="<?= $idHorta ?>">
                                 <input type="hidden" name="idHorta"
                                     value="<?= htmlspecialchars($idHorta, ENT_QUOTES) ?>">
                                 <input type="hidden" name="idCanteiro"
@@ -226,7 +226,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <?php foreach ($chartData as $sensor => $rows):
                 if (in_array(strtolower($sensor), ['chuva digital', 'lat', 'lng']))
                     continue;
