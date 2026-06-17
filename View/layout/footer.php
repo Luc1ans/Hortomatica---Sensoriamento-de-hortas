@@ -33,7 +33,7 @@
         </div>
 
         <div class="footer-bottom">
-            <p class="copyright">&copy; 2025 Hortomática. Todos os direitos reservados.<br>
+            <p class="copyright">&copy; 2026 Hortomática. Todos os direitos reservados.<br>
                 Desenvolvido por Luciano David</p>
         </div>
     </div>

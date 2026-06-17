@@ -1,6 +1,7 @@
 <?php
 
 use Controller\Database;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
@@ -15,8 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $user = $query->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user['senha'])) { 
-            $_SESSION['user_id'] = $user['idUsuario']; 
+        if ($user && password_verify($password, $user['senha'])) {
+            $_SESSION['user_id'] = $user['idUsuario'];
             header('Location: index.php');
             exit;
         } else {
@@ -51,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php
             if (isset($_SESSION['error_message'])) {
                 echo '<div class="alert alert-danger" role="alert">' . htmlspecialchars($_SESSION['error_message']) . '</div>';
-                unset($_SESSION['error_message']); 
+                unset($_SESSION['error_message']);
             }
             ?>
 
@@ -67,10 +68,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         placeholder="Digite sua senha" required>
                 </div>
                 <button type="submit" class="btn btn-login w-100">Entrar</button>
-                <div class="text-center mt-3">
-                    <p>Não tem uma conta? <a href="Cadastro.php">Cadastre-se</a></p>
-                </div>
             </form>
+            <div class="text-center mt-3">
+                <p>
+                    Não tem uma conta?
+                    <a href="index.php?page=cadastro">
+                        Cadastre-se
+                    </a>
+                </p>
+            </div>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

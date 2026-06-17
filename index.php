@@ -55,6 +55,12 @@ if ($page === 'login') {
     exit;
 }
 
+// Páginas que não precisam de banco (públicas)
+if ($page === 'cadastro') {
+    require __DIR__ . '/View/Cadastro.php';
+    exit;
+}
+
 $database = new Database();
 $pdo = $database->connect();
 $modelD = new Dispositivo($pdo);
@@ -73,7 +79,4 @@ elseif ($page === 'analise') {
     $leituraCtrl->processarRequisicao();
 }elseif ($page === 'home') {
     require __DIR__ . '/View/home.php';
-} elseif ($page === 'cadastro') {
-    require __DIR__ . '/View/Cadastro.php';
-}
-
+} 

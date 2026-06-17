@@ -35,6 +35,13 @@ if (!$idHorta) {
 
 $pdo = Database::connect();
 
+// Verifica se dispositivo existe
+$stmtCheck = $pdo->prepare("SELECT idDispositivo FROM Dispositivo WHERE idDispositivo = ?");
+$stmtCheck->execute([$idDispositivo]);
+if (!$stmtCheck->fetch()) {
+    die("Dispositivo $idDispositivo não existe");
+}
+
 // Recupera última leitura
 $stmtLast = $pdo->prepare("
     SELECT CONCAT(data_leitura,' ',hora_leitura) AS ultima_leitura
@@ -52,41 +59,65 @@ $ultimaLeitura = $row
 // Prepara insert
 $stmt = $pdo->prepare("
     INSERT INTO LeituraSensores
-      (data_leitura, hora_leitura, nome_sensor, valor_leitura, Dispositivo_idDispositivo, fonte)
+      (hora_leitura, data_leitura, nome_sensor, valor_leitura, Dispositivo_idDispositivo, fonte)
     VALUES
-      (:data_leitura, :hora_leitura, :nome_sensor, :valor_leitura, :disp, 'CSV')
+      (:hora_leitura, :data_leitura, :nome_sensor, :valor_leitura, :disp, 'CSV')
 ");
 
-while (($raw = fgets($handle)) !== false) {
-    $line = trim($raw);
-    if ($line === '') {
-        continue;
-    }
+$linhasInseridas = 0;
+$contadorLinhas = 0;
 
+while (($raw = fgets($handle)) !== false) {
+    $contadorLinhas++;
+    $line = trim($raw);
+    if ($line === '') continue;
+
+    // Formato esperado: "15/5/2025, hora: 8:23:30 Nome Sensor: Valor"
     $cols = explode(',', $line, 2);
     if (count($cols) < 2) {
+        error_log("Linha $contadorLinhas: Formato inválido - $line");
         continue;
     }
-    [$dataLeitura, $rest] = $cols;
-    if (strpos($rest, 'hora:') === false) {
-        continue;
-    }
-    [, $afterHora] = explode('hora:', $rest, 2);
-    $parts = explode(' ', trim($afterHora), 2);
-    $horaLeitura = $parts[0];
-    $infoSensor = $parts[1] ?? '';
+    
+    $dataLeitura = trim($cols[0]);
+    $rest = trim($cols[1]);
 
-    $tsCsv = new DateTime("$dataLeitura $horaLeitura");
+    // Extração robusta usando regex (permite espaço após "hora:")
+    if (!preg_match('/hora:\s*(\d{1,2}:\d{1,2}:\d{1,2})\s+(.+)/', $rest, $matches)) {
+        error_log("Linha $contadorLinhas: Padrão de hora não encontrado - $rest");
+        continue;
+    }
+    
+    $horaLeitura = trim($matches[1]);
+    $sensorInfo = trim($matches[2]);
+
+    // Parse correto da data/hora (formato brasileiro)
+    $tsCsv = DateTime::createFromFormat('d/m/Y H:i:s', "$dataLeitura $horaLeitura");
+    if (!$tsCsv) {
+        error_log("Linha $contadorLinhas: Formato de data inválido - $dataLeitura $horaLeitura");
+        continue;
+    }
+
+    // Verifica se é mais recente que última leitura
     if ($ultimaLeitura && $tsCsv <= $ultimaLeitura) {
         continue;
     }
 
-    foreach (explode(',', $infoSensor) as $sensorInfo) {
-        $sensorParts = explode(':', $sensorInfo, 2) + [1 => ''];
-        $nomeSensor = trim($sensorParts[0]);
-        $valorSensor = trim($sensorParts[1]);
-        $valorFormatado = floatval(str_replace(['%', 'C'], '', $valorSensor));
+    // Cada linha contém APENAS UM sensor - formato: "Nome Sensor: Valor"
+    $sensorParts = explode(':', $sensorInfo, 2);
+    if (count($sensorParts) < 2) {
+        error_log("Linha $contadorLinhas: Formato de sensor inválido - $sensorInfo");
+        continue;
+    }
+    
+    $nomeSensor = trim($sensorParts[0]);
+    $valorSensor = trim($sensorParts[1]);
 
+    // Limpeza do valor numérico (preserva números, pontos e negativos)
+    $valorFormatado = preg_replace('/[^\d\.\-]/', '', $valorSensor);
+    $valorFormatado = $valorFormatado !== '' ? floatval($valorFormatado) : 0;
+
+    try {
         $stmt->execute([
             ':data_leitura' => $tsCsv->format('Y-m-d'),
             ':hora_leitura' => $tsCsv->format('H:i:s'),
@@ -94,11 +125,21 @@ while (($raw = fgets($handle)) !== false) {
             ':valor_leitura' => $valorFormatado,
             ':disp' => $idDispositivo,
         ]);
+        $linhasInseridas++;
+    } catch (PDOException $e) {
+        error_log("Erro na inserção (Linha $contadorLinhas): " . $e->getMessage());
     }
 }
 
 fclose($handle);
-header(
-    "Location: ../index.php?page=analise&idHorta={$idHorta}&imported=1&dispositivos[]={$idDispositivo}"
-);
+
+// Redireciona com feedback
+$parametros = http_build_query([
+    'page' => 'analise',
+    'idHorta' => $idHorta,
+    'imported' => $linhasInseridas,
+    'dispositivos[]' => $idDispositivo
+]);
+
+header("Location: ../index.php?$parametros");
 exit;

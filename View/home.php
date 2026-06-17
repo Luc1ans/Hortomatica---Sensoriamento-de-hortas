@@ -30,12 +30,6 @@
                         Gerenciar Dispositivos
                     </a>
                 </div>
-                <div class="col-12 col-md-6 col-lg-4">
-                    <a href="index.php?page=relatorios" class="btn-home btn-main">
-                        <i class="bi bi-clipboard-data-fill display-4 mb-3"></i>
-                        Relatórios
-                    </a>
-                </div>
             </div>
         </div>
     </div>

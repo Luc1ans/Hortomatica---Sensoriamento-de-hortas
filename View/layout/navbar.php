@@ -16,7 +16,6 @@ require_once __DIR__ . '/../../Assets/Logout.php';
                 <a class="nav-link navbar-text" href="index.php?page=gerenciar_hortas">Gerenciar Hortas</a>
                 <a class="nav-link navbar-text" href="index.php?page=gerenciar_dispositivos">Gerenciar
                     Dispositivos</a>
-                <a class="nav-link navbar-text" href="<?= BASE_PATH ?>/Relatorio.php">Relatórios</a>
             </div>
             <div class="ms-auto">
                 <form action="<?= BASE_PATH ?>/index.php" method="POST" class="d-inline">

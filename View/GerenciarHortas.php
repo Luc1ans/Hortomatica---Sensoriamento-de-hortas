@@ -13,25 +13,41 @@
 
 <body>
     <?php if (!empty($_SESSION['mensagem'])): ?>
-        <div class="position-fixed top-50 start-50 translate-middle" style="z-index:2000; min-width:300px;">
-            <div class="toast show align-items-center text-bg-<?= $_SESSION['tipo_mensagem'] ?> border-0" role="alert"
-                aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body text-center w-100">
-                        <?= $_SESSION['mensagem']; ?>
+        <?php
+        $tipo = $_SESSION['tipo_mensagem'] ?? 'info';
+        $icone = $tipo === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill';
+        $corBorda = $tipo === 'success' ? '#198754' : '#dc3545'; // verde / vermelho Bootstrap
+        ?>
+        <div aria-live="polite" aria-atomic="true" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+            <div class="toast show" role="alert" style="
+            background: #fff; 
+            border-left: 5px solid <?= $corBorda ?>; 
+            border-radius: 8px; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            min-width: 280px;
+            max-width: 400px;
+            padding: 0;
+            ">
+                <div class="d-flex align-items-center p-3">
+                    <i class="bi <?= $icone ?>" style="font-size: 1.5rem; color: <?= $corBorda ?>; margin-right: 12px;"></i>
+                    <div class="me-auto" style="color: #333; font-weight: 500; font-size: 0.95rem;">
+                        <?= $_SESSION['mensagem'] ?>
                     </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    <button type="button" class="btn-close ms-2" data-bs-dismiss="toast"
+                        style="font-size: 0.8rem;"></button>
                 </div>
             </div>
         </div>
         <script>
             setTimeout(() => {
-                document.querySelector('.toast').classList.remove('show');
-            }, 2000);
+                const toastEl = document.querySelector('.toast.show');
+                if (toastEl) {
+                    toastEl.classList.remove('show');
+                    setTimeout(() => toastEl.parentElement.remove(), 300);
+                }
+            }, 4000);
         </script>
-        <?php
-        unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']);
-        ?>
+        <?php unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']); ?>
     <?php endif; ?>
 
     <div class="container mt-4">
@@ -363,7 +379,8 @@
         </div>
     </div>
 
-     <script src="<?= BASE_PATH ?>/Assets/js/GerenciarHortas.js" defer></script>                                                    
+    <script src="<?= BASE_PATH ?>/Assets/js/GerenciarHortas.js" defer></script>
     <?php include __DIR__ . '/layout/footer.php'; ?>
 </body>
+
 </html>

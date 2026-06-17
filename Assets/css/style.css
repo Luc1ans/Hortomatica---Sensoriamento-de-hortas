@@ -630,3 +630,11 @@ google-charts {
     width: 3rem;
     height: 3rem;
   }
+  
+.toast {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.toast:not(.show) {
+    opacity: 0;
+    transform: translateX(20px);
+}

@@ -90,7 +90,19 @@ class HortaController
                 break;
 
             case 'excluir':
-                $this->model->deleteHorta((int) $data['idHorta']);
+                try {
+                    $this->model->deleteHorta((int) $data['idHorta']);
+                    $_SESSION['mensagem'] = 'Horta excluída com sucesso!';
+                    $_SESSION['tipo_mensagem'] = 'success';
+                } catch (\PDOException $e) {
+                    // Código 23000 = violação de chave estrangeira
+                    if ($e->getCode() == 23000) {
+                        $_SESSION['mensagem'] = 'Não é possível excluir esta horta porque ela ainda possui canteiros. Remova os canteiros primeiro.';
+                    } else {
+                        $_SESSION['mensagem'] = 'Erro ao excluir horta: ' . $e->getMessage();
+                    }
+                    $_SESSION['tipo_mensagem'] = 'danger';
+                }
                 break;
 
             case 'listar_canteiros':

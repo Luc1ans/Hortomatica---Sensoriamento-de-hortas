@@ -1,7 +1,4 @@
 <?php
-session_start();
-
-require __DIR__ . '/vendor/autoload.php';
 
 use Controller\Database;
 // Verifica se o formulário foi enviado
@@ -14,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($senha !== $confirmSenha) {
         $_SESSION['error_message'] = 'As senhas não coincidem.';
-        header('Location: cadastro.php');
+        header('Location: ' . BASE_PATH . '/index.php?page=cadastro');
         exit;
     }
 
@@ -30,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($user) {
             $_SESSION['error_message'] = 'Este e-mail já está em uso.';
-            header('Location: cadastro.php');
+            header('Location: ' . BASE_PATH . '/index.php?page=cadastro');
             exit;
         }
 
@@ -44,12 +41,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $insertQuery->execute();
 
         $_SESSION['success_message'] = 'Cadastro realizado com sucesso! Agora, faça login.';
-        header('Location: login.php');
+        header('Location: ' . BASE_PATH . '/index.php?page=login');
         exit;
 
     } catch (PDOException $e) {
         $_SESSION['error_message'] = 'Erro no banco de dados: ' . $e->getMessage();
-        header(header: 'Location: cadastro.php');
+        header('Location: ' . BASE_PATH . '/index.php?page=cadastro');
         exit;
     }
 }
@@ -61,7 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="..\Assets\css\style.css">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/Assets/css/style.css">
+    <?php include __DIR__ . '/layout/navbar.php'; ?>
     <title>Cadastro - Hortomática</title>
 </head>
 <body>
@@ -82,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ?>
 
             <!-- Formulário de Cadastro -->
-            <form action="cadastro.php" method="POST">
+            <form action="<?= BASE_PATH ?>/index.php?page=cadastro" method="POST">
                 <div class="mb-3">
                     <label for="usuario" class="form-label">Usuário</label>
                     <input type="text" class="form-control" id="usuario" name="usuario" placeholder="Digite seu nome de usuário" required>
@@ -111,6 +109,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <?php include '../Assets/footer.php'; ?>
+    <?php include __DIR__ . '/layout/footer.php'; ?>
 </body>
 </html>
